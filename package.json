@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "dotenv": "^16.4.7",
     "thirdweb": "^5.86.2"
   }
 }
