@@ -69,4 +69,6 @@ contract FundChain {
         return allCampaigns;
     }
 
+    // work done: All smart contracts created
+
 }
