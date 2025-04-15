@@ -1,3 +1,64 @@
+# 🚀 FundChain – OneStop DeFi Funding Platform (Web2 + Web3 Hybrid)
+
+> FundChain is a **transparent crowdfunding platform** that blends traditional web tech with blockchain-backed campaign tracking. It serves as a **universal, one-stop funding ecosystem** bringing together **NGOs, Temples, Government bodies, and Individuals** for secure, traceable, and collaborative fundraising.
+
+---
+
+## 🎯 Vision – OneStop Funding Application
+
+FundChain aims to become the **single gateway for all types of funding**, built with trust, transparency, and simplicity at its core.
+
+### Supported Campaign Types:
+- 🏥 Medical emergencies and healthcare needs  
+- 🛕 Religious fundraising (Temples, Churches, Mosques)  
+- 🫶 NGO-driven social causes  
+- 🏛️ Government-endorsed public programs  
+- 🎓 Personal development & education support  
+
+With blockchain-enabled campaign verification and Web2-friendly UX, **everyone can donate with confidence** — no crypto required.
+
+---
+
+## 🔐 Authentication & Payments
+
+| Feature        | Tech Used                                     |
+|----------------|-----------------------------------------------|
+| Login System   | Email/Password or Google Login (e.g., Firebase Auth / Supabase) |
+| Payments       | Razorpay (or Stripe, Paytm, etc.)             |
+| Wallet Login   | ❌ Not required                                |
+| Blockchain     | Read-only smart contract interactions for campaign data |
+
+---
+
+## 🧠 Smart Contract Integration
+
+Although the platform does **not use crypto payments**, it **leverages smart contracts** for:
+
+- 📜 Transparent storage of campaign metadata  
+- ✅ Ownership validation and status tracking  
+- ⏱️ Milestone-based progress control  
+
+> Smart contracts ensure campaign integrity, while Razorpay handles traditional transactions.
+
+---
+
+## 🧩 Feature Breakdown
+
+| Feature                        | Description                                                                 |
+|-------------------------------|-----------------------------------------------------------------------------|
+| 👥 User Login                 | Register/login using email or Google OAuth                                  |
+| 📦 Campaign Creation         | Start a new fundraising campaign (title, description, image, amount, etc.)  |
+| 💳 Payment Integration        | Secure Razorpay-based donation system                                       |
+| ⏱️ Milestone Tracking        | Show campaign progress and how funds are being used                         |
+| 🔒 Admin Campaign Verification| Admin verifies authenticity of NGOs, Temples, or Government campaigns       |
+| 📜 Donor Receipts             | Email-based receipts with transaction info                                  |
+| 📈 Dashboard & Analytics      | View created campaigns, donations, and progress tracking                    |
+| 💬 Collaborator Integration   | Collaborations with verified bodies (NGO, Temple, Gov, etc.)                |
+
+---
+
+## 🧭 Page / Component Structure (Frontend)
+
 
 ---
 
