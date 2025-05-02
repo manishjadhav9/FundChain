@@ -10,7 +10,7 @@ import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
 import { useAuth } from "@/hooks/use-auth"
 import { allCampaigns, userDonations } from "@/lib/data"
-import { ArrowRight, Plus } from "lucide-react"
+import { ArrowRight, Plus, TrendingUp, Users, Heart, Award, Calendar } from "lucide-react"
 
 export default function DashboardPage() {
   const router = useRouter()
@@ -27,233 +27,216 @@ export default function DashboardPage() {
     return null
   }
 
-  // Mock user campaigns (in a real app, these would be filtered from the database)
-  const userCampaigns = allCampaigns.slice(0, 2)
+  // Calculate analytics
+  const totalDonated = userDonations.reduce((sum, donation) => sum + donation.amount, 0)
+  const campaignsSupported = new Set(userDonations.map(d => d.campaignId)).size
+  const averageDonation = totalDonated / userDonations.length
+  const lastDonation = userDonations[0] // Most recent donation
+
+  // Get top causes based on donation amount
+  const causeDonations = userDonations.reduce((acc, donation) => {
+    const campaign = allCampaigns.find(c => c.id === donation.campaignId)
+    if (campaign) {
+      acc[campaign.type] = (acc[campaign.type] || 0) + donation.amount
+    }
+    return acc
+  }, {} as Record<string, number>)
+
+  const topCause = Object.entries(causeDonations)
+    .sort(([, a], [, b]) => b - a)[0]?.[0] || "None"
 
   return (
     <div className="container py-8">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
         <div>
-          <h1 className="text-3xl font-bold mb-2">Dashboard</h1>
-          <p className="text-muted-foreground">Welcome back, {user.name}! Manage your campaigns and donations.</p>
+          <h1 className="text-3xl font-bold mb-2">Donor Dashboard</h1>
+          <p className="text-muted-foreground">Track your impact and manage your donations</p>
         </div>
-        <Link href="/campaigns/create">
+        <Link href="/campaigns">
           <Button className="bg-primary hover:bg-primary/90">
-            <Plus className="mr-2 h-4 w-4" /> Start a Campaign
+            <Plus className="mr-2 h-4 w-4" /> Find Campaigns
           </Button>
         </Link>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      {/* Analytics Overview */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Total Campaigns</CardTitle>
+            <CardTitle className="text-sm font-medium">Total Donated</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">{userCampaigns.length}</div>
-            <p className="text-xs text-muted-foreground mt-1">
-              {userCampaigns.length === 0
-                ? "No campaigns yet"
-                : userCampaigns.length === 1
-                  ? "1 active campaign"
-                  : `${userCampaigns.length} active campaigns`}
-            </p>
+            <div className="text-3xl font-bold">₹{totalDonated.toLocaleString()}</div>
+            <p className="text-xs text-muted-foreground mt-1">Lifetime contributions</p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Total Donations</CardTitle>
+            <CardTitle className="text-sm font-medium">Campaigns Supported</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">{userDonations.length}</div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Across {new Set(userDonations.map((d) => d.campaignId)).size} campaigns
-            </p>
+            <div className="text-3xl font-bold">{campaignsSupported}</div>
+            <p className="text-xs text-muted-foreground mt-1">Active campaigns</p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Amount Donated</CardTitle>
+            <CardTitle className="text-sm font-medium">Average Donation</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">
-              ₹{userDonations.reduce((sum, donation) => sum + donation.amount, 0).toLocaleString()}
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">Thank you for your generosity!</p>
+            <div className="text-3xl font-bold">₹{Math.round(averageDonation).toLocaleString()}</div>
+            <p className="text-xs text-muted-foreground mt-1">Per campaign</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">Top Cause</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold capitalize">{topCause}</div>
+            <p className="text-xs text-muted-foreground mt-1">Most supported category</p>
           </CardContent>
         </Card>
       </div>
 
-      <Tabs defaultValue="campaigns" className="space-y-6">
-        <TabsList>
-          <TabsTrigger value="campaigns">My Campaigns</TabsTrigger>
-          <TabsTrigger value="donations">My Donations</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="campaigns" className="space-y-6">
-          {userCampaigns.length > 0 ? (
-            <div className="grid grid-cols-1 gap-6">
-              {userCampaigns.map((campaign) => {
-                const percentRaised = Math.min(Math.round((campaign.amountRaised / campaign.targetAmount) * 100), 100)
-
-                return (
-                  <Card key={campaign.id}>
-                    <CardContent className="p-6">
-                      <div className="grid grid-cols-1 md:grid-cols-[2fr_1fr] gap-6">
-                        <div>
-                          <div className="flex items-center justify-between mb-2">
-                            <h3 className="text-lg font-bold">{campaign.title}</h3>
-                            <Badge variant={campaign.status === "VERIFIED" ? "default" : "secondary"}>
-                              {campaign.status}
-                            </Badge>
-                          </div>
-                          <p className="text-sm text-muted-foreground mb-4 line-clamp-2">{campaign.description}</p>
-                          <div className="space-y-2 mb-4">
-                            <div className="flex justify-between text-sm">
-                              <span>₹{campaign.amountRaised.toLocaleString()}</span>
-                              <span className="text-muted-foreground">
-                                of ₹{campaign.targetAmount.toLocaleString()}
-                              </span>
-                            </div>
-                            <Progress value={percentRaised} className="h-2" />
-                            <div className="flex justify-between text-xs text-muted-foreground">
-                              <span>{percentRaised}% Raised</span>
-                              <span>{campaign.donorsCount} Donors</span>
-                            </div>
-                          </div>
-                          <div className="flex gap-2">
-                            <Link href={`/campaigns/${campaign.id}`}>
-                              <Button variant="outline" size="sm">
-                                View Campaign
-                              </Button>
-                            </Link>
-                            <Link href={`/campaigns/${campaign.id}/edit`}>
-                              <Button variant="outline" size="sm">
-                                Edit
-                              </Button>
-                            </Link>
-                          </div>
-                        </div>
-
-                        <div className="space-y-4">
-                          <h4 className="font-medium text-sm">Milestones</h4>
-                          <div className="space-y-2">
-                            {campaign.milestones.map((milestone, index) => (
-                              <div key={milestone.id} className="flex items-center gap-2">
-                                <div
-                                  className={`flex items-center justify-center w-6 h-6 rounded-full text-xs ${
-                                    milestone.isCompleted
-                                      ? "bg-primary/20 text-primary"
-                                      : "bg-muted text-muted-foreground"
-                                  }`}
-                                >
-                                  {index + 1}
-                                </div>
-                                <div className="flex-1">
-                                  <p className="text-sm font-medium line-clamp-1">{milestone.title}</p>
-                                  <div className="flex justify-between text-xs">
-                                    <span className="text-muted-foreground">
-                                      ₹{milestone.targetAmount.toLocaleString()}
-                                    </span>
-                                    <span className={milestone.isCompleted ? "text-primary" : "text-muted-foreground"}>
-                                      {milestone.isCompleted ? "Completed" : "Pending"}
-                                    </span>
-                                  </div>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                )
-              })}
+      {/* Impact Metrics */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Impact Score</CardTitle>
+            <CardDescription>Your contribution impact</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center justify-between">
+              <div className="text-4xl font-bold">92</div>
+              <TrendingUp className="h-8 w-8 text-green-500" />
             </div>
-          ) : (
-            <Card>
-              <CardHeader>
-                <CardTitle>No Campaigns Yet</CardTitle>
-                <CardDescription>You haven't created any fundraising campaigns yet.</CardDescription>
-              </CardHeader>
-              <CardFooter>
-                <Link href="/campaigns/create">
-                  <Button className="bg-primary hover:bg-primary/90">
-                    <Plus className="mr-2 h-4 w-4" /> Start Your First Campaign
-                  </Button>
-                </Link>
-              </CardFooter>
-            </Card>
-          )}
-
-          {userCampaigns.length > 0 && (
-            <div className="flex justify-center">
-              <Link href="/campaigns/create">
-                <Button className="bg-primary hover:bg-primary/90">
-                  <Plus className="mr-2 h-4 w-4" /> Start a New Campaign
-                </Button>
-              </Link>
+            <Progress value={92} className="mt-4" />
+            <p className="text-sm text-muted-foreground mt-2">Top 10% of donors</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Community Impact</CardTitle>
+            <CardDescription>People helped through your donations</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center justify-between">
+              <div className="text-4xl font-bold">1,250+</div>
+              <Users className="h-8 w-8 text-blue-500" />
             </div>
-          )}
-        </TabsContent>
+            <p className="text-sm text-muted-foreground mt-2">Across all campaigns</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Donation Streak</CardTitle>
+            <CardDescription>Consistent giving</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center justify-between">
+              <div className="text-4xl font-bold">3</div>
+              <Award className="h-8 w-8 text-yellow-500" />
+            </div>
+            <p className="text-sm text-muted-foreground mt-2">Months of active giving</p>
+          </CardContent>
+        </Card>
+      </div>
 
-        <TabsContent value="donations" className="space-y-6">
-          {userDonations.length > 0 ? (
-            <div className="grid grid-cols-1 gap-4">
-              {userDonations.map((donation) => (
-                <Card key={donation.id}>
-                  <CardContent className="p-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h3 className="font-medium">{donation.campaign.title}</h3>
-                        <p className="text-sm text-muted-foreground">
-                          {new Date(donation.createdAt).toLocaleDateString("en-US", {
-                            year: "numeric",
-                            month: "long",
-                            day: "numeric",
-                          })}
-                        </p>
-                      </div>
-                      <div className="text-right">
-                        <p className="font-bold">₹{donation.amount.toLocaleString()}</p>
-                        <Badge variant="outline" className="mt-1">
-                          {donation.status}
-                        </Badge>
-                      </div>
+      {/* Recent Activity and Campaigns */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Recent Donations</CardTitle>
+            <CardDescription>Your latest contributions</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {userDonations.slice(0, 3).map((donation) => (
+                <div key={donation.id} className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="relative h-10 w-10 rounded-full overflow-hidden">
+                      <img
+                        src={donation.campaign.image || "/placeholder.svg"}
+                        alt={donation.campaign.title}
+                        className="object-cover"
+                      />
                     </div>
-                    <div className="flex justify-between mt-4">
-                      <Link href={`/campaigns/${donation.campaignId}`}>
-                        <Button variant="ghost" size="sm">
-                          View Campaign
-                        </Button>
-                      </Link>
-                      <Link href={`/donations/${donation.id}/receipt`}>
-                        <Button variant="outline" size="sm">
-                          View Receipt
-                        </Button>
-                      </Link>
+                    <div>
+                      <p className="font-medium">{donation.campaign.title}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {new Date(donation.createdAt).toLocaleDateString()}
+                      </p>
                     </div>
-                  </CardContent>
-                </Card>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-medium">₹{donation.amount.toLocaleString()}</p>
+                    <Badge variant="outline" className="text-xs">
+                      {donation.status}
+                    </Badge>
+                  </div>
+                </div>
               ))}
             </div>
-          ) : (
-            <Card>
-              <CardHeader>
-                <CardTitle>No Donations Yet</CardTitle>
-                <CardDescription>You haven't made any donations yet.</CardDescription>
-              </CardHeader>
-              <CardFooter>
-                <Link href="/campaigns">
-                  <Button className="bg-primary hover:bg-primary/90">
-                    Browse Campaigns <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
-                </Link>
-              </CardFooter>
-            </Card>
-          )}
-        </TabsContent>
-      </Tabs>
+          </CardContent>
+          <CardFooter>
+            <Link href="/donations" className="w-full">
+              <Button variant="outline" className="w-full">
+                View All Donations
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </Link>
+          </CardFooter>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Active Campaigns</CardTitle>
+            <CardDescription>Campaigns you're supporting</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {allCampaigns
+                .filter((campaign) => userDonations.some((d) => d.campaignId === campaign.id))
+                .slice(0, 3)
+                .map((campaign) => (
+                  <div key={campaign.id} className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="relative h-10 w-10 rounded-full overflow-hidden">
+                        <img
+                          src={campaign.image || "/placeholder.svg"}
+                          alt={campaign.title}
+                          className="object-cover"
+                        />
+                      </div>
+                      <div>
+                        <p className="font-medium">{campaign.title}</p>
+                        <div className="flex items-center gap-2">
+                          <Progress
+                            value={(campaign.amountRaised / campaign.targetAmount) * 100}
+                            className="w-24 h-2"
+                          />
+                          <span className="text-sm text-muted-foreground">
+                            {Math.round((campaign.amountRaised / campaign.targetAmount) * 100)}%
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    <Badge variant="secondary">{campaign.status}</Badge>
+                  </div>
+                ))}
+            </div>
+          </CardContent>
+          <CardFooter>
+            <Link href="/campaigns" className="w-full">
+              <Button variant="outline" className="w-full">
+                Browse More Campaigns
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </Link>
+          </CardFooter>
+        </Card>
+      </div>
     </div>
   )
 }
