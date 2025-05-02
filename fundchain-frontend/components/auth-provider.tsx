@@ -5,6 +5,7 @@ import type React from "react"
 import { createContext, useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useToast } from "@/components/ui/use-toast"
+import { getUserAvatar } from "@/lib/constants"
 
 type User = {
   id: string
@@ -50,21 +51,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           id: "admin-1",
           name: "Admin User",
           email: "admin@fundchain.com",
-          image: null,
+          image: getUserAvatar("admin"),
           role: "admin",
         },
         "ngo@fundchain.com": {
           id: "ngo-1",
           name: "NGO User",
           email: "ngo@fundchain.com",
-          image: null,
+          image: getUserAvatar("ngo"),
           role: "ngo",
         },
         "donor@fundchain.com": {
           id: "donor-1",
           name: "Donor User",
           email: "donor@fundchain.com",
-          image: null,
+          image: getUserAvatar("donor"),
           role: "donor",
         },
       }

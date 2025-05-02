@@ -38,8 +38,8 @@ export default function Home() {
             </div>
             <div className="flex justify-center lg:justify-end">
               <Image
-                src="/placeholder.svg?height=400&width=500"
-                alt="Hero Image"
+                src="https://images.unsplash.com/photo-1532629345422-7515f3d16bb6?w=500&h=400&auto=format&fit=crop&q=60"
+                alt="People helping each other"
                 width={500}
                 height={400}
                 className="rounded-lg object-cover"
