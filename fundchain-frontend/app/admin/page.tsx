@@ -100,11 +100,11 @@ export default function AdminPage() {
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Pending Verification</CardTitle>
+            <CardTitle className="text-sm font-medium">Total NGOs</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">{pendingCampaigns.length}</div>
-            <p className="text-xs text-muted-foreground mt-1">Campaigns awaiting review</p>
+            <div className="text-3xl font-bold">24</div>
+            <p className="text-xs text-muted-foreground mt-1">Verified organizations</p>
           </CardContent>
         </Card>
         <Card>
@@ -129,264 +129,262 @@ export default function AdminPage() {
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-[2fr_1fr_1fr] gap-4 mb-8">
-        <div className="relative">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            type="search"
-            placeholder="Search campaigns..."
-            className="pl-8"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-        </div>
-        <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger>
-            <SelectValue placeholder="Filter by status" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Statuses</SelectItem>
-            <SelectItem value="OPEN">Pending</SelectItem>
-            <SelectItem value="VERIFIED">Verified</SelectItem>
-            <SelectItem value="CLOSED">Closed</SelectItem>
-          </SelectContent>
-        </Select>
-        <Select value={typeFilter} onValueChange={setTypeFilter}>
-          <SelectTrigger>
-            <SelectValue placeholder="Filter by type" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Types</SelectItem>
-            <SelectItem value="MEDICAL">Medical</SelectItem>
-            <SelectItem value="RELIGIOUS">Religious</SelectItem>
-            <SelectItem value="NGO">NGO</SelectItem>
-            <SelectItem value="GOVERNMENT">Government</SelectItem>
-            <SelectItem value="EDUCATION">Education</SelectItem>
-            <SelectItem value="OTHER">Other</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
-      <Tabs defaultValue="pending" className="space-y-6">
+      <Tabs defaultValue="campaigns" className="space-y-6">
         <TabsList>
-          <TabsTrigger value="pending" className="flex gap-2">
-            <Clock className="h-4 w-4" /> Pending
+          <TabsTrigger value="campaigns" className="flex gap-2">
+            <FileText className="h-4 w-4" /> Campaigns
             <Badge variant="secondary" className="ml-1">
-              {pendingCampaigns.length}
+              {campaigns.length}
             </Badge>
           </TabsTrigger>
-          <TabsTrigger value="verified" className="flex gap-2">
-            <CheckCircle className="h-4 w-4" /> Verified
+          <TabsTrigger value="ngos" className="flex gap-2">
+            <Shield className="h-4 w-4" /> NGOs
             <Badge variant="secondary" className="ml-1">
-              {verifiedCampaigns.length}
+              24
             </Badge>
           </TabsTrigger>
-          <TabsTrigger value="closed" className="flex gap-2">
-            <XCircle className="h-4 w-4" /> Closed
+          <TabsTrigger value="users" className="flex gap-2">
+            <Users className="h-4 w-4" /> Users
             <Badge variant="secondary" className="ml-1">
-              {closedCampaigns.length}
+              1,245
             </Badge>
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="pending" className="space-y-6">
-          {pendingCampaigns.length > 0 ? (
-            <div className="grid grid-cols-1 gap-6">
-              {pendingCampaigns.map((campaign) => (
-                <Card key={campaign.id}>
-                  <CardContent className="p-6">
-                    <div className="grid grid-cols-1 md:grid-cols-[1fr_2fr_1fr] gap-6">
-                      <div className="relative h-40 w-full rounded-md overflow-hidden">
-                        <Image
-                          src={campaign.image || "/placeholder.svg?height=200&width=200"}
-                          alt={campaign.title}
-                          fill
-                          className="object-cover"
-                        />
-                      </div>
+        <TabsContent value="campaigns">
+          <div className="grid grid-cols-1 md:grid-cols-[2fr_1fr_1fr] gap-4 mb-8">
+            <div className="relative">
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                type="search"
+                placeholder="Search campaigns..."
+                className="pl-8"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger>
+                <SelectValue placeholder="Filter by status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Statuses</SelectItem>
+                <SelectItem value="OPEN">Pending</SelectItem>
+                <SelectItem value="VERIFIED">Verified</SelectItem>
+                <SelectItem value="CLOSED">Closed</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={typeFilter} onValueChange={setTypeFilter}>
+              <SelectTrigger>
+                <SelectValue placeholder="Filter by type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Types</SelectItem>
+                <SelectItem value="MEDICAL">Medical</SelectItem>
+                <SelectItem value="RELIGIOUS">Religious</SelectItem>
+                <SelectItem value="NGO">NGO</SelectItem>
+                <SelectItem value="GOVERNMENT">Government</SelectItem>
+                <SelectItem value="EDUCATION">Education</SelectItem>
+                <SelectItem value="OTHER">Other</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
 
-                      <div>
-                        <div className="flex items-center gap-2 mb-2">
-                          <h3 className="text-lg font-bold">{campaign.title}</h3>
-                          <Badge variant="secondary">{campaign.status}</Badge>
-                          <Badge variant="outline">{campaign.type}</Badge>
+          <div className="grid grid-cols-1 gap-6">
+            {filteredCampaigns.map((campaign) => (
+              <Card key={campaign.id}>
+                <CardContent className="p-6">
+                  <div className="grid grid-cols-1 md:grid-cols-[1fr_2fr_1fr] gap-6">
+                    <div className="relative h-40 w-full rounded-md overflow-hidden">
+                      <Image
+                        src={campaign.image || "/placeholder.svg?height=200&width=200"}
+                        alt={campaign.title}
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
+
+                    <div>
+                      <div className="flex items-center gap-2 mb-2">
+                        <h3 className="text-lg font-bold">{campaign.title}</h3>
+                        <Badge variant="secondary">{campaign.status}</Badge>
+                        <Badge variant="outline">{campaign.type}</Badge>
+                      </div>
+                      <p className="text-sm text-muted-foreground mb-4">{campaign.description}</p>
+                      <div className="flex items-center gap-4 text-sm">
+                        <div className="flex items-center gap-1">
+                          <Users className="h-4 w-4 text-muted-foreground" />
+                          <span>Organizer: {campaign.organizer.name}</span>
                         </div>
-                        <p className="text-sm text-muted-foreground mb-4">{campaign.description}</p>
-                        <div className="flex items-center gap-4 text-sm">
-                          <div className="flex items-center gap-1">
-                            <Users className="h-4 w-4 text-muted-foreground" />
-                            <span>Organizer: {campaign.organizer.name}</span>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <AlertCircle className="h-4 w-4 text-muted-foreground" />
-                            <span>Target: ₹{campaign.targetAmount.toLocaleString()}</span>
-                          </div>
+                        <div className="flex items-center gap-1">
+                          <AlertCircle className="h-4 w-4 text-muted-foreground" />
+                          <span>
+                            Raised: ₹{campaign.amountRaised.toLocaleString()} of ₹
+                            {campaign.targetAmount.toLocaleString()}
+                          </span>
                         </div>
                       </div>
+                    </div>
 
-                      <div className="flex flex-col gap-3 justify-center">
+                    <div className="flex flex-col gap-3 justify-center">
+                      <Link href={`/admin/campaigns/${campaign.id}`}>
+                        <Button variant="outline" className="w-full">
+                          <FileText className="mr-2 h-4 w-4" />
+                          View Details
+                        </Button>
+                      </Link>
+                      {campaign.status === "OPEN" && (
                         <Button
-                          className="bg-primary hover:bg-primary/90"
+                          variant="default"
+                          className="w-full"
                           onClick={() => handleVerifyCampaign(campaign.id)}
                         >
                           <Shield className="mr-2 h-4 w-4" />
                           Verify Campaign
                         </Button>
-                        <Link href={`/admin/campaigns/${campaign.id}`}>
-                          <Button variant="outline" className="w-full">
-                            <FileText className="mr-2 h-4 w-4" />
-                            View Details
-                          </Button>
-                        </Link>
-                        <Button variant="outline" className="w-full">
-                          Contact Organizer
-                        </Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          ) : (
-            <Card>
-              <CardHeader>
-                <CardTitle>No Pending Campaigns</CardTitle>
-                <CardDescription>There are no campaigns awaiting verification at this time.</CardDescription>
-              </CardHeader>
-            </Card>
-          )}
-        </TabsContent>
-
-        <TabsContent value="verified" className="space-y-6">
-          {verifiedCampaigns.length > 0 ? (
-            <div className="grid grid-cols-1 gap-6">
-              {verifiedCampaigns.map((campaign) => (
-                <Card key={campaign.id}>
-                  <CardContent className="p-6">
-                    <div className="grid grid-cols-1 md:grid-cols-[1fr_2fr_1fr] gap-6">
-                      <div className="relative h-40 w-full rounded-md overflow-hidden">
-                        <Image
-                          src={campaign.image || "/placeholder.svg?height=200&width=200"}
-                          alt={campaign.title}
-                          fill
-                          className="object-cover"
-                        />
-                      </div>
-
-                      <div>
-                        <div className="flex items-center gap-2 mb-2">
-                          <h3 className="text-lg font-bold">{campaign.title}</h3>
-                          <Badge>{campaign.status}</Badge>
-                          <Badge variant="outline">{campaign.type}</Badge>
-                        </div>
-                        <p className="text-sm text-muted-foreground mb-4">{campaign.description}</p>
-                        <div className="flex items-center gap-4 text-sm">
-                          <div className="flex items-center gap-1">
-                            <Users className="h-4 w-4 text-muted-foreground" />
-                            <span>Organizer: {campaign.organizer.name}</span>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <AlertCircle className="h-4 w-4 text-muted-foreground" />
-                            <span>
-                              Raised: ₹{campaign.amountRaised.toLocaleString()} of ₹
-                              {campaign.targetAmount.toLocaleString()}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="flex flex-col gap-3 justify-center">
-                        <Button variant="destructive" onClick={() => handleCloseCampaign(campaign.id)}>
+                      )}
+                      {campaign.status === "VERIFIED" && (
+                        <Button
+                          variant="destructive"
+                          className="w-full"
+                          onClick={() => handleCloseCampaign(campaign.id)}
+                        >
                           <XCircle className="mr-2 h-4 w-4" />
                           Close Campaign
                         </Button>
-                        <Link href={`/admin/campaigns/${campaign.id}`}>
-                          <Button variant="outline" className="w-full">
-                            <FileText className="mr-2 h-4 w-4" />
-                            View Details
-                          </Button>
-                        </Link>
-                        <Button variant="outline" className="w-full">
-                          Contact Organizer
-                        </Button>
-                      </div>
+                      )}
                     </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          ) : (
-            <Card>
-              <CardHeader>
-                <CardTitle>No Verified Campaigns</CardTitle>
-                <CardDescription>There are no verified campaigns at this time.</CardDescription>
-              </CardHeader>
-            </Card>
-          )}
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         </TabsContent>
 
-        <TabsContent value="closed" className="space-y-6">
-          {closedCampaigns.length > 0 ? (
-            <div className="grid grid-cols-1 gap-6">
-              {closedCampaigns.map((campaign) => (
-                <Card key={campaign.id}>
-                  <CardContent className="p-6">
-                    <div className="grid grid-cols-1 md:grid-cols-[1fr_2fr_1fr] gap-6">
-                      <div className="relative h-40 w-full rounded-md overflow-hidden">
-                        <Image
-                          src={campaign.image || "/placeholder.svg?height=200&width=200"}
-                          alt={campaign.title}
-                          fill
-                          className="object-cover"
-                        />
-                      </div>
+        <TabsContent value="ngos">
+          <div className="grid grid-cols-1 md:grid-cols-[2fr_1fr] gap-4 mb-8">
+            <div className="relative">
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                type="search"
+                placeholder="Search NGOs..."
+                className="pl-8"
+              />
+            </div>
+            <Select>
+              <SelectTrigger>
+                <SelectValue placeholder="Filter by status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Statuses</SelectItem>
+                <SelectItem value="VERIFIED">Verified</SelectItem>
+                <SelectItem value="PENDING">Pending</SelectItem>
+                <SelectItem value="SUSPENDED">Suspended</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
 
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <Card key={i}>
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-4 mb-4">
+                    <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
+                      <Shield className="h-6 w-6 text-primary" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold">NGO Name {i}</h3>
+                      <p className="text-sm text-muted-foreground">Verified Organization</p>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Active Campaigns</span>
+                      <span className="font-medium">3</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Total Raised</span>
+                      <span className="font-medium">₹2.5L</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Success Rate</span>
+                      <span className="font-medium text-green-500">85%</span>
+                    </div>
+                  </div>
+                  <Button variant="outline" className="w-full mt-4">
+                    View Details
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </TabsContent>
+
+        <TabsContent value="users">
+          <div className="grid grid-cols-1 md:grid-cols-[2fr_1fr_1fr] gap-4 mb-8">
+            <div className="relative">
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                type="search"
+                placeholder="Search users..."
+                className="pl-8"
+              />
+            </div>
+            <Select>
+              <SelectTrigger>
+                <SelectValue placeholder="Filter by role" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Roles</SelectItem>
+                <SelectItem value="donor">Donors</SelectItem>
+                <SelectItem value="organizer">Organizers</SelectItem>
+                <SelectItem value="admin">Admins</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select>
+              <SelectTrigger>
+                <SelectValue placeholder="Sort by" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="recent">Recently Active</SelectItem>
+                <SelectItem value="donations">Most Donations</SelectItem>
+                <SelectItem value="campaigns">Most Campaigns</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="grid grid-cols-1 gap-6">
+            {[1, 2, 3, 4, 5].map((i) => (
+              <Card key={i}>
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
+                        <Users className="h-6 w-6 text-primary" />
+                      </div>
                       <div>
-                        <div className="flex items-center gap-2 mb-2">
-                          <h3 className="text-lg font-bold">{campaign.title}</h3>
-                          <Badge variant="secondary">{campaign.status}</Badge>
-                          <Badge variant="outline">{campaign.type}</Badge>
-                        </div>
-                        <p className="text-sm text-muted-foreground mb-4">{campaign.description}</p>
-                        <div className="flex items-center gap-4 text-sm">
-                          <div className="flex items-center gap-1">
-                            <Users className="h-4 w-4 text-muted-foreground" />
-                            <span>Organizer: {campaign.organizer.name}</span>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <AlertCircle className="h-4 w-4 text-muted-foreground" />
-                            <span>
-                              Final: ₹{campaign.amountRaised.toLocaleString()} of ₹
-                              {campaign.targetAmount.toLocaleString()}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="flex flex-col gap-3 justify-center">
-                        <Link href={`/admin/campaigns/${campaign.id}`}>
-                          <Button variant="outline" className="w-full">
-                            <FileText className="mr-2 h-4 w-4" />
-                            View Details
-                          </Button>
-                        </Link>
-                        <Button variant="outline" className="w-full">
-                          Download Report
-                        </Button>
+                        <h3 className="font-semibold">User Name {i}</h3>
+                        <p className="text-sm text-muted-foreground">user{i}@example.com</p>
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          ) : (
-            <Card>
-              <CardHeader>
-                <CardTitle>No Closed Campaigns</CardTitle>
-                <CardDescription>There are no closed campaigns at this time.</CardDescription>
-              </CardHeader>
-            </Card>
-          )}
+                    <div className="flex items-center gap-4">
+                      <div className="text-right">
+                        <p className="text-sm font-medium">₹15,000</p>
+                        <p className="text-xs text-muted-foreground">Total Donated</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm font-medium">5</p>
+                        <p className="text-xs text-muted-foreground">Campaigns</p>
+                      </div>
+                      <Button variant="outline" size="sm">
+                        View Profile
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         </TabsContent>
       </Tabs>
 
