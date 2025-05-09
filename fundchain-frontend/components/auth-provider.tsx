@@ -36,9 +36,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const storedUser = localStorage.getItem("fundchain-user")
     if (storedUser) {
-      setUser(JSON.parse(storedUser))
+      const parsedUser = JSON.parse(storedUser)
+      setUser(parsedUser)
+      
+      // Only redirect on initial mount if on the root dashboard
+      if (window.location.pathname === "/dashboard") {
+        const redirectPath = parsedUser.role === "admin" 
+          ? "/admin" 
+          : parsedUser.role === "ngo" 
+            ? "/dashboard/ngo" 
+            : null
+        
+        if (redirectPath) {
+          router.replace(redirectPath)
+        }
+      }
     }
-  }, [])
+  }, []) // Remove router dependency to prevent re-runs
 
   const login = async (email: string, password: string) => {
     try {
@@ -79,7 +93,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           title: "Login successful",
           description: `Welcome back, ${dummyUser.name}!`,
         })
-        router.push("/dashboard")
+        
+        // Redirect based on user role
+        const redirectPath = dummyUser.role === "admin" 
+          ? "/admin" 
+          : dummyUser.role === "ngo" 
+            ? "/dashboard/ngo" 
+            : "/dashboard"
+        
+        router.replace(redirectPath)
       } else {
         throw new Error("Invalid credentials")
       }

@@ -14,16 +14,17 @@ import { ArrowRight, Plus, TrendingUp, Users, Heart, Award, Calendar } from "luc
 
 export default function DashboardPage() {
   const router = useRouter()
-  const { user } = useAuth()
+  const { user, isNGO } = useAuth()
 
-  // Redirect to login if not authenticated
   useEffect(() => {
     if (!user) {
       router.push("/auth/login?redirect=/dashboard")
+    } else if (isNGO) {
+      router.replace("/dashboard/ngo")
     }
-  }, [user, router])
+  }, [user, isNGO, router])
 
-  if (!user) {
+  if (!user || isNGO) {
     return null
   }
 
