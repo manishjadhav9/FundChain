@@ -77,7 +77,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         },
         "donor@fundchain.com": {
           id: "donor-1",
-          name: "Donor User",
+          name: "Manish Jadhav",
           email: "donor@fundchain.com",
           image: getUserAvatar("donor"),
           role: "donor",

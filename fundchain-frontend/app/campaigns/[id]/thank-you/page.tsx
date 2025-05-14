@@ -2,14 +2,27 @@
 
 import { useSearchParams } from "next/navigation"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
+import { useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { allCampaigns } from "@/lib/data"
 import { CheckCircle, Download, Share2 } from "lucide-react"
 
 export default function ThankYouPage({ params }: { params: { id: string } }) {
+  const router = useRouter()
   const searchParams = useSearchParams()
   const amount = searchParams.get("amount") || "0"
+  const donor = searchParams.get("donor") || "Manish Jadhav" // Default to Manish Jadhav
+  
+  // Auto-redirect to campaign details page after 5 seconds
+  useEffect(() => {
+    const redirectTimer = setTimeout(() => {
+      router.push(`/campaigns/${params.id}`);
+    }, 5000);
+    
+    return () => clearTimeout(redirectTimer);
+  }, [params.id, router]);
 
   const campaign = allCampaigns.find((c) => c.id === params.id)
 
@@ -43,6 +56,9 @@ export default function ThankYouPage({ params }: { params: { id: string } }) {
         <p className="text-muted-foreground">
           Your contribution of ₹{formattedAmount} to {campaign.title} has been received.
         </p>
+        <p className="mt-2 text-sm text-primary">
+          You'll be redirected to the campaign page in a few seconds...
+        </p>
       </div>
 
       <Card className="mb-8">
@@ -61,8 +77,12 @@ export default function ThankYouPage({ params }: { params: { id: string } }) {
               <span>{campaign.title}</span>
             </div>
             <div className="flex justify-between">
+              <span className="text-muted-foreground">Donor</span>
+              <span>{donor}</span>
+            </div>
+            <div className="flex justify-between">
               <span className="text-muted-foreground">Organizer</span>
-              <span>{campaign.organizer.name}</span>
+              <span>{campaign.organizer?.name || "Manish Jadhav"}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-muted-foreground">Donation Amount</span>

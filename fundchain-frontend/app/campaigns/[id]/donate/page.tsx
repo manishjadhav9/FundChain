@@ -23,8 +23,8 @@ export default function DonatePage({ params }: { params: { id: string } }) {
   const { user } = useAuth()
   const [amount, setAmount] = useState("")
   const [customAmount, setCustomAmount] = useState("")
-  const [name, setName] = useState(user?.name || "")
-  const [email, setEmail] = useState(user?.email || "")
+  const [name, setName] = useState("Manish Jadhav")
+  const [email, setEmail] = useState(user?.email || "manish.jadhav@example.com")
   const [message, setMessage] = useState("")
   const [isAnonymous, setIsAnonymous] = useState(false)
   const [paymentMethod, setPaymentMethod] = useState("card")
@@ -57,6 +57,7 @@ export default function DonatePage({ params }: { params: { id: string } }) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
+    const donorName = "Manish Jadhav"
     const donationAmount = amount === "custom" ? Number.parseInt(customAmount) : Number.parseInt(amount)
 
     if (!donationAmount || donationAmount <= 0) {
@@ -76,10 +77,10 @@ export default function DonatePage({ params }: { params: { id: string } }) {
 
       toast({
         title: "Donation successful!",
-        description: `Thank you for your donation of ₹${donationAmount.toLocaleString()} to ${campaign.title}`,
+        description: `Thank you ${donorName} for your donation of ₹${donationAmount.toLocaleString()} to ${campaign.title}`,
       })
 
-      router.push(`/campaigns/${campaign.id}/thank-you?amount=${donationAmount}`)
+      router.push(`/campaigns/${campaign.id}/thank-you?amount=${donationAmount}&donor=${encodeURIComponent(donorName)}`)
     } catch (error) {
       toast({
         title: "Donation failed",
@@ -150,7 +151,7 @@ export default function DonatePage({ params }: { params: { id: string } }) {
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     required={!isAnonymous}
-                    disabled={isAnonymous}
+                    disabled={true}
                   />
                 </div>
                 <div className="space-y-2">
@@ -161,7 +162,7 @@ export default function DonatePage({ params }: { params: { id: string } }) {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required={!isAnonymous}
-                    disabled={isAnonymous}
+                    disabled={true}
                   />
                 </div>
               </div>

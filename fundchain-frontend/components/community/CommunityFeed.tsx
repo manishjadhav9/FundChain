@@ -43,7 +43,7 @@ const MOCK_POSTS: Post[] = [
   {
     id: "2",
     author: {
-      name: "Michael Chen",
+      name: "Manish Jadhav",
       image: "/avatars/michael.jpg",
       role: "Donor"
     },

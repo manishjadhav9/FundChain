@@ -246,10 +246,10 @@ export default function CampaignsPage() {
                 </div>
                 
                 <div className="flex gap-2">
-                  <Link href={`/campaigns/${campaign.id}`}>
+                  <Link href={`/campaigns/${campaign.id}`} passHref>
                     <Button variant="outline" size="sm">View Details</Button>
                   </Link>
-                  <Link href={`/campaigns/${campaign.id}/donate`}>
+                  <Link href={`/campaigns/${campaign.id}/donate`} passHref>
                     <Button size="sm">Donate</Button>
                   </Link>
                 </div>

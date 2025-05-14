@@ -32,7 +32,7 @@ const mockNgoData = {
   recentDonations: [
     {
       id: "1",
-      donorName: "John Doe",
+      donorName: "Manish Jadhav",
       amount: 5000,
       campaign: "Help Build a School in Rural India",
       date: "2024-03-15",
@@ -40,7 +40,7 @@ const mockNgoData = {
     },
     {
       id: "2",
-      donorName: "Jane Smith",
+      donorName: "Manish Jadhav",
       amount: 10000,
       campaign: "Medical Aid for Cancer Patients",
       date: "2024-03-10",
