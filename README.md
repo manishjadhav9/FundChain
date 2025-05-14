@@ -1,143 +1,204 @@
-Certainly! Based on the provided guidelines and the information from the FundChain project, here's an updated and comprehensive `README.md` file:
+# 🔗 FundChain
 
----
-
-```markdown
 <p align="center">
-  <img src="https://your-logo-link-here.png" alt="FundChain Logo" width="150">
+  <img src="tech.png" alt="FundChain Logo" width="500">
 </p>
 
-<h1 align="center" style="color:orange;">🧡 FundChain</h1>
-<p align="center" style="color:white;">A transparent, blockchain-powered crowdfunding platform for everyone.</p>
+<h2 align="center">Transparent Blockchain-Powered Crowdfunding</h2>
+<p align="center">A decentralized platform that brings trust and transparency to fundraising.</p>
 
 ---
 
-## 🎯 Vision
-
-**FundChain** aims to be the single gateway for all types of fundraising — trusted, transparent, and simple.
-
-⚡ Built with Blockchain Verification + Web2 UX.
-
----
-
-## 🛠️ Supported Campaign Types
-
-- 🏥 Medical Emergencies
-- 🛕 Religious Causes
-- 🫶 NGO Initiatives
-- 🏛️ Government Projects
-- 🎓 Education Support
+## 📑 Table of Contents
+- [Overview](#overview)
+- [Core Features](#core-features)
+- [Smart Contract Architecture](#smart-contract-architecture)
+- [User Roles & Dashboards](#user-roles--dashboards)
+- [Campaign Types](#campaign-types)
+- [Development Progress](#development-progress)
+- [Tech Stack](#tech-stack)
+- [Installation](#installation)
+- [Contributing](#contributing)
+- [License](#license)
 
 ---
 
-## 🔥 Core Features
+## 🔍 Overview
+
+**FundChain** revolutionizes traditional crowdfunding by leveraging blockchain technology to create a transparent, trustworthy platform for fundraising. Our hybrid approach combines the immutability and transparency of blockchain with a frictionless Web2 user experience, making it accessible to non-technical users.
+
+### Key Differentiators:
+
+- **Milestone-Based Funding**: Automatic fund release tied to verified milestone completion
+- **Verifiable Transparency**: All transactions permanently recorded on blockchain
+- **Multi-Tier Verification**: For enhanced campaign legitimacy
+- **Traditional Payment Integration**: No crypto wallet required for donors
+
+---
+
+## 🛠️ Core Features
 
 ### 👥 User Authentication
-
-- Email & Password Login
-- Google OAuth Login
-- Admin-only Access to Verification Panel
+- Email & Password Authentication
+- Google OAuth Integration
+- Role-based Access Control System
 
 ### 🚀 Campaign Management
-
-- Create fundraising campaigns with title, description, target amount, and images.
-- Milestone-based progress control (smart contract verified).
-- Live donation and milestone updates.
-
-### 💳 Payment Integration
-
-- Razorpay secure payment gateway.
-- No crypto wallet required.
-- Email-based donor receipts.
-- (Coming Soon) PDF receipts with donation breakdown.
-
-### 🔒 Admin Verification
-
-- Manual verification of NGOs, Religious Organizations, or Government campaigns.
-- Blockchain smart contract deployment for verified campaigns.
+- Comprehensive Campaign Creation Portal
+- Milestone Definition & Tracking
+- Document Verification System
+- Smart Contract-Based Verification
 - Status Tracking: `OPEN | VERIFIED | CLOSED`
 
-### 📈 Donor Dashboard
+### 💰 Donation System
+- Traditional Payment Methods via Razorpay
+- Blockchain-Verified Transaction Records
+- Real-time Donation Tracking
+- Email Receipts & Notifications
 
-- View your donations.
-- Track funded campaigns.
-- Personalized recommendations (Coming Soon).
+### 📊 Admin Controls
+- Campaign Verification Dashboard
+- Fraud Detection & Prevention Tools
+- Campaign Lifecycle Management
+- Analytics & Reporting Interface
 
-### 🧩 Smart Contracts
-
-- **FundFactory.sol** - Deploy new campaign contracts dynamically.
-- **FundCampaign.sol** - Track milestones, organizers, target amount, and statuses.
-
-### 📦 Collaborations
-
-- Official collaborations with NGOs, Temples, or verified Government bodies.
-
----
-
-## 🧠 Smart Contract Architecture
-
-```mermaid
-graph TD;
-    A[FundFactory Contract] --> B{Deploys};
-    B --> C[FundCampaign Contract];
-    C --> D[Milestones Tracking];
-    C --> E[Ownership Validation];
-    C --> F[Status Management];
-```
-
-Smart contracts ensure immutable record-keeping and trustless campaign execution.
+### 📱 User Dashboards
+- Donor Activity Tracking
+- Organizer Campaign Management
+- Milestone Completion Updates
+- Fund Withdrawal System
 
 ---
 
-## 📊 Admin Dashboard Overview 👑
+## 📐 Smart Contract Architecture
 
-A special panel only accessible to Admin users, for maintaining platform quality, transparency, and trust.
+FundChain's blockchain infrastructure consists of two primary smart contracts:
 
-- 📋 View Campaigns: List of all campaigns: Pending, Verified, Closed
-- 🔍 Verify Campaigns: Manual approval of NGOs, Religious campaigns, Government campaigns
-- 🚨 Flag/Remove Campaigns: Remove suspicious or fraudulent fundraising campaigns
-- 📝 Edit Campaign Metadata: Update descriptions, titles, images if necessary
-- 🛠️ Manage Collaborators: Add official NGOs, Temples, or Government programs
-- 📜 Blockchain Contract Actions: Verify, close, or update campaigns directly through smart contracts
-- 📈 Analytics: Admin-only dashboard showing total donations, active users, trending causes
+### FundFactory.sol
+The master contract that:
+- Deploys individual campaign contracts
+- Maintains registry of all campaigns
+- Handles administrative verification
+- Manages admin access control
 
-✅ Secure Access: Only verified Admin logins.
+### FundCampaign.sol
+Individual campaign contracts that:
+- Track campaign details and status
+- Manage milestone definitions
+- Process donations
+- Control fund distribution based on milestone completion
+- Enforce verification requirements
 
-✅ Blockchain Powered: Contract-level actions recorded transparently.
+Smart contracts ensure immutable record-keeping and trustless campaign execution while providing transparency to all stakeholders.
 
-✅ Real-time Updates: Campaign status synced immediately after verification.
+---
+
+## 👤 User Roles & Dashboards
+
+### Admin
+- Campaign verification authority
+- Platform management capabilities
+- Analytics & reporting access
+- Content moderation tools
+
+### Campaign Organizers
+- Campaign creation & management
+- Document submission for verification
+- Milestone update reporting
+- Fund withdrawal requests
+
+### Donors
+- Campaign discovery & filtering
+- Donation processing
+- Tracking funded campaigns
+- Receipt management
+
+---
+
+## 📋 Campaign Types
+
+FundChain supports a diverse range of fundraising initiatives:
+
+- **🏥 Medical Emergencies**: Healthcare costs, treatments, surgeries
+- **🛕 Religious Causes**: Temple renovations, religious initiatives
+- **🫶 NGO Initiatives**: Social impact projects, community development
+- **🏛️ Government Projects**: Public works, civic improvements
+- **🎓 Education Support**: Scholarships, educational resources, school funding
+
+---
+
+## 📈 Development Progress
+
+### Completed
+- Smart contract architecture & development
+- Frontend UI/UX design & implementation
+- Authentication system
+- Campaign creation flow
+- Admin verification interface
+- Blockchain integration
+
+### In Progress
+- Payment gateway integration optimization
+- Email notification system
+- Campaign analytics dashboard
+- Enhanced verification workflows
+
+### Upcoming
+- Mobile-responsive optimizations
+- PDF receipt generation
+- Advanced analytics implementation
+- NGO verification via government APIs
+- Enhanced security features
 
 ---
 
 ## ⚙️ Tech Stack
 
-- **Frontend**: React.js + TailwindCSS
-- **Backend**: Node.js (Express.js)
-- **Blockchain**: Solidity, Hardhat
-- **Payment Gateway**: Razorpay Integration
-- **Database**: MongoDB
-- **Hosting**: AWS / Vercel
+### Frontend
+- **Framework**: Next.js 14 (React 18)
+- **Language**: TypeScript
+- **Styling**: TailwindCSS + shadcn/ui
+- **State Management**: React Context + Hooks
+- **Form Handling**: React Hook Form + Zod
+
+### Blockchain
+- **Smart Contracts**: Solidity
+- **Development Environment**: Hardhat
+- **Network**: Ethereum (testnet)
+- **IPFS Integration**: For document storage
+
+### Backend Services
+- **Authentication**: Custom Auth + OAuth
+- **Payment Processing**: Razorpay Integration
+- **Data Storage**: MongoDB (campaign metadata)
+- **File Storage**: IPFS (decentralized)
+
+### Deployment
+- **Frontend**: Vercel
+- **Smart Contracts**: Ethereum Testnet
 
 ---
 
-## 🚀 Future Roadmap (V2 Plans)
+## 🚀 Installation
 
-- 📧 Email alerts for milestone updates.
-- 🧾 Downloadable PDF receipts for each donation.
-- 🆔 NGO verification via Aadhaar APIs.
-- 📊 Live analytics dashboard (Top Donated Campaigns, Donor Patterns).
-- 🎯 Personalized donor recommendations.
-- 📦 Donation tracking by Cause Type / Geography.
+```bash
+# Clone the repository
+git clone https://github.com/yourusername/fundchain.git
+cd fundchain
 
----
+# Install frontend dependencies
+cd fundchain-frontend
+npm install
 
-## ✨ Color Palette
+# Install smart contract dependencies
+cd ../fundchain-contracts
+npm install
 
-| Color | Hex Code | Usage |
-|:-----|:---------|:------|
-| 🖤 Black | `#000000` | Texts, Headings |
-| 🤍 White | `#FFFFFF` | Background, Contrast text |
-| 🧡 Orange | `#FFA500` | Highlights, Buttons, Banners |
+# Run frontend development server
+cd ../fundchain-frontend
+npm run dev
 
----
-
+# Compile smart contracts
+cd ../fundchain-contracts
+npx hardhat dev
+```
