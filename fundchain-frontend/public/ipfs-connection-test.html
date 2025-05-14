@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IPFS Connection Test</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .container {
+            border: 1px solid #eaeaea;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        h1 {
+            color: #0070f3;
+        }
+        button {
+            background-color: #0070f3;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #0051a8;
+        }
+        pre {
+            background-color: #f5f5f5;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-size: 14px;
+        }
+        .success {
+            color: #00a854;
+            font-weight: bold;
+        }
+        .error {
+            color: #f5222d;
+            font-weight: bold;
+        }
+        #logContainer {
+            height: 300px;
+            overflow-y: auto;
+            background-color: #f5f5f5;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>IPFS Connection Test</h1>
+    
+    <div class="container">
+        <h2>Connection Settings</h2>
+        <p>IPFS API: <code id="apiHost">http://127.0.0.1:5001</code></p>
+        <p>IPFS Gateway: <code id="gateway">http://127.0.0.1:8080</code></p>
+        <p>Node ID: <code id="nodeId">12D3KooWNp5JabhQdHbeapJwxdQYwD2J7NV21pr84tv4GFghUeF7</code></p>
+    </div>
+    
+    <div class="container">
+        <h2>Connection Tests</h2>
+        <button id="testApi">Test API Connection</button>
+        <button id="testGateway">Test Gateway Connection</button>
+        <button id="testPublicGateway">Test Public Gateway</button>
+        <button id="testAll">Test All</button>
+        <button id="clearLogs">Clear Logs</button>
+        
+        <div id="logContainer"></div>
+    </div>
+    
+    <div class="container">
+        <h2>CORS Configuration</h2>
+        <p>If you're having connection issues, use these commands to configure CORS:</p>
+        <pre>ipfs config --json API.HTTPHeaders.Access-Control-Allow-Origin '["*"]'
+ipfs config --json API.HTTPHeaders.Access-Control-Allow-Methods '["GET", "POST", "PUT", "DELETE", "OPTIONS"]'
+ipfs config --json API.HTTPHeaders.Access-Control-Allow-Headers '["Authorization", "X-Requested-With", "Range", "Content-Type"]'
+ipfs config --json API.HTTPHeaders.Access-Control-Expose-Headers '["Location", "WWW-Authenticate"]'
+ipfs config --json API.HTTPHeaders.Access-Control-Allow-Credentials '["true"]'</pre>
+        <p>Then restart your IPFS node for the changes to take effect.</p>
+    </div>
+    
+    <script>
+        // Configuration
+        const IPFS_API = 'http://127.0.0.1:5001';
+        const IPFS_GATEWAY = 'http://127.0.0.1:8080';
+        const IPFS_NODE_ID = '12D3KooWNp5JabhQdHbeapJwxdQYwD2J7NV21pr84tv4GFghUeF7';
+        const PUBLIC_GATEWAY = 'https://ipfs.io/ipfs';
+        
+        // Display settings
+        document.getElementById('apiHost').textContent = IPFS_API;
+        document.getElementById('gateway').textContent = IPFS_GATEWAY;
+        document.getElementById('nodeId').textContent = IPFS_NODE_ID;
+        
+        // Log function
+        function log(message, type = 'info') {
+            const logContainer = document.getElementById('logContainer');
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.className = type;
+            logEntry.innerHTML = `<span>[${timestamp}]</span> ${message}`;
+            logContainer.appendChild(logEntry);
+            logContainer.scrollTop = logContainer.scrollHeight;
+        }
+        
+        // Clear logs
+        document.getElementById('clearLogs').addEventListener('click', () => {
+            document.getElementById('logContainer').innerHTML = '';
+            log('Logs cleared');
+        });
+        
+        // Test API Connection
+        async function testApiConnection() {
+            log('Testing API connection...');
+            try {
+                const response = await fetch(`${IPFS_API}/api/v0/id`, {
+                    method: 'POST',
+                    credentials: 'omit',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    log(`✅ API connection successful! Node ID: ${data.ID}`, 'success');
+                    return true;
+                } else {
+                    log(`⚠️ API returned status: ${response.status} ${response.statusText}`, 'error');
+                    return false;
+                }
+            } catch (error) {
+                log(`❌ API connection failed: ${error.message}`, 'error');
+                return false;
+            }
+        }
+        
+        // Test Gateway Connection
+        async function testGatewayConnection() {
+            log('Testing Gateway connection...');
+            try {
+                const timestamp = Date.now();
+                const response = await fetch(`${IPFS_GATEWAY}/ipfs/${IPFS_NODE_ID}?ts=${timestamp}`, {
+                    method: 'HEAD',
+                    cache: 'no-store',
+                    credentials: 'omit'
+                });
+                
+                if (response.ok) {
+                    log('✅ Gateway connection successful!', 'success');
+                    return true;
+                } else {
+                    log(`⚠️ Gateway returned status: ${response.status} ${response.statusText}`, 'error');
+                    return false;
+                }
+            } catch (error) {
+                log(`❌ Gateway connection failed: ${error.message}`, 'error');
+                return false;
+            }
+        }
+        
+        // Test Public Gateway Connection
+        async function testPublicGatewayConnection() {
+            log('Testing Public Gateway connection...');
+            try {
+                const response = await fetch(`${PUBLIC_GATEWAY}/${IPFS_NODE_ID}`, {
+                    method: 'HEAD',
+                    cache: 'no-store',
+                    credentials: 'omit'
+                });
+                
+                if (response.ok) {
+                    log('✅ Public Gateway connection successful!', 'success');
+                    return true;
+                } else {
+                    log(`⚠️ Public Gateway returned status: ${response.status} ${response.statusText}`, 'error');
+                    return false;
+                }
+            } catch (error) {
+                log(`❌ Public Gateway connection failed: ${error.message}`, 'error');
+                return false;
+            }
+        }
+        
+        // Test All Connections
+        async function testAllConnections() {
+            log('Running all connection tests...');
+            
+            const apiResult = await testApiConnection();
+            const gatewayResult = await testGatewayConnection();
+            const publicResult = await testPublicGatewayConnection();
+            
+            if (apiResult && gatewayResult) {
+                log('✅ All local connections successful!', 'success');
+            } else if (publicResult) {
+                log('⚠️ Public gateway working but local connections failed. Check your IPFS node.', 'error');
+            } else {
+                log('❌ All connection tests failed. Please check your IPFS setup.', 'error');
+            }
+        }
+        
+        // Event listeners
+        document.getElementById('testApi').addEventListener('click', testApiConnection);
+        document.getElementById('testGateway').addEventListener('click', testGatewayConnection);
+        document.getElementById('testPublicGateway').addEventListener('click', testPublicGatewayConnection);
+        document.getElementById('testAll').addEventListener('click', testAllConnections);
+        
+        // Run all tests when page loads
+        window.addEventListener('DOMContentLoaded', () => {
+            log('Page loaded, starting connection tests...');
+            testAllConnections();
+        });
+    </script>
+</body>
+</html> 

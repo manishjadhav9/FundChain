@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FundChain IPFS Test</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+            color: #111827;
+        }
+        h1, h2, h3 {
+            color: #ef6c00;
+        }
+        button {
+            background-color: #ef6c00;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            margin: 5px;
+            cursor: pointer;
+            border-radius: 6px;
+            font-weight: 500;
+        }
+        button:hover {
+            background-color: #f57c00;
+        }
+        button:disabled {
+            background-color: #e0e0e0;
+            cursor: not-allowed;
+        }
+        .status {
+            padding: 15px;
+            border-radius: 6px;
+            margin: 10px 0;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        .card {
+            padding: 20px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        pre {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-size: 14px;
+        }
+        input[type="file"] {
+            margin: 10px 0;
+        }
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .header h1 {
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>FundChain IPFS Troubleshooter</h1>
+    </div>
+    
+    <div class="card">
+        <h2>IPFS Connection Status</h2>
+        <p>First, let's check if your IPFS node is running and accessible:</p>
+        <button id="checkConnection">Check IPFS Connection</button>
+        <div id="connectionResult"></div>
+    </div>
+    
+    <div class="card">
+        <h2>CORS Configuration</h2>
+        <p>CORS headers must be correctly configured for your browser to communicate with the IPFS API:</p>
+        <button id="checkConfig">Check CORS Configuration</button>
+        <div id="configResult"></div>
+        
+        <div class="info" style="margin-top: 20px;">
+            <h3>How to Configure CORS</h3>
+            <p>If you're having CORS issues, run these commands in your terminal:</p>
+            <pre>ipfs config --json API.HTTPHeaders.Access-Control-Allow-Origin '["*"]'
+ipfs config --json API.HTTPHeaders.Access-Control-Allow-Methods '["PUT", "POST", "GET"]'
+ipfs config --json API.HTTPHeaders.Access-Control-Allow-Headers '["Authorization"]'
+ipfs config --json API.HTTPHeaders.Access-Control-Expose-Headers '["Location"]'
+ipfs config --json API.HTTPHeaders.Access-Control-Allow-Credentials '["true"]'</pre>
+            <p><strong>After running these commands, restart your IPFS node!</strong></p>
+        </div>
+    </div>
+    
+    <div class="card">
+        <h2>Set CORS Configuration</h2>
+        <p>You can try to set the CORS configuration directly from this page:</p>
+        <button id="setCors">Set CORS Configuration</button>
+        <div id="corsResult"></div>
+    </div>
+    
+    <div class="card">
+        <h2>Test File Upload</h2>
+        <p>Test uploading a file to IPFS:</p>
+        <input type="file" id="fileUpload">
+        <button id="uploadTest">Test Upload</button>
+        <div id="uploadResult"></div>
+    </div>
+
+    <div class="card">
+        <h2>IPFS Troubleshooting Checklist</h2>
+        <ol>
+            <li>Ensure IPFS Desktop is running or your IPFS daemon is active</li>
+            <li>Verify that the IPFS API is accessible at <code>http://127.0.0.1:5001</code></li>
+            <li>Configure CORS headers as shown above</li>
+            <li>Restart your IPFS node after changing configuration</li>
+            <li>If using IPFS Desktop, try going to Settings → Advanced → IPFS Config and add the CORS headers</li>
+        </ol>
+    </div>
+
+    <script>
+        const IPFS_API_URL = 'http://127.0.0.1:5001/api/v0';
+        const connectionResult = document.getElementById('connectionResult');
+        const configResult = document.getElementById('configResult');
+        const corsResult = document.getElementById('corsResult');
+        const uploadResult = document.getElementById('uploadResult');
+
+        // Check IPFS connection
+        document.getElementById('checkConnection').addEventListener('click', async () => {
+            try {
+                connectionResult.innerHTML = 'Checking connection...';
+                const response = await fetch(`${IPFS_API_URL}/id`, {
+                    method: 'POST'
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`Failed to connect: ${response.status} ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                connectionResult.innerHTML = `
+                    <div class="status success">
+                        ✅ Connected to IPFS node
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    </div>
+                `;
+            } catch (error) {
+                connectionResult.innerHTML = `
+                    <div class="status error">
+                        ❌ Connection failed: ${error.message}
+                    </div>
+                    <div class="info">
+                        <p>If connection failed, please ensure:</p>
+                        <ul>
+                            <li>IPFS daemon is running</li>
+                            <li>API address is correct (default: http://127.0.0.1:5001)</li>
+                        </ul>
+                    </div>
+                `;
+            }
+        });
+
+        // Check current CORS config
+        document.getElementById('checkConfig').addEventListener('click', async () => {
+            try {
+                configResult.innerHTML = 'Checking CORS configuration...';
+                const response = await fetch(`${IPFS_API_URL}/config?arg=API.HTTPHeaders`, {
+                    method: 'POST'
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`Failed to get config: ${response.status} ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                configResult.innerHTML = `
+                    <div class="status info">
+                        Current CORS Configuration:
+                        <pre>${JSON.stringify(data.Value, null, 2)}</pre>
+                    </div>
+                `;
+                
+                // Check if CORS is properly configured
+                const corsHeaders = data.Value || {};
+                if (!corsHeaders['Access-Control-Allow-Origin'] || 
+                    !corsHeaders['Access-Control-Allow-Origin'].includes('*')) {
+                    configResult.innerHTML += `
+                        <div class="status error">
+                            ⚠️ CORS is not properly configured. Required headers are missing.
+                        </div>
+                    `;
+                } else {
+                    configResult.innerHTML += `
+                        <div class="status success">
+                            ✅ CORS appears to be properly configured
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                configResult.innerHTML = `
+                    <div class="status error">
+                        ❌ Failed to check CORS config: ${error.message}
+                    </div>
+                `;
+            }
+        });
+
+        // Set CORS configuration
+        document.getElementById('setCors').addEventListener('click', async () => {
+            corsResult.innerHTML = 'Setting CORS configuration...';
+            
+            try {
+                // Set Allow-Origin
+                await fetch(`${IPFS_API_URL}/config?arg=API.HTTPHeaders.Access-Control-Allow-Origin&arg=["*"]`, {
+                    method: 'POST'
+                });
+                
+                // Set Allow-Methods
+                await fetch(`${IPFS_API_URL}/config?arg=API.HTTPHeaders.Access-Control-Allow-Methods&arg=["PUT", "POST", "GET"]`, {
+                    method: 'POST'
+                });
+                
+                // Set Allow-Headers
+                await fetch(`${IPFS_API_URL}/config?arg=API.HTTPHeaders.Access-Control-Allow-Headers&arg=["Authorization"]`, {
+                    method: 'POST'
+                });
+
+                // Set Expose-Headers
+                await fetch(`${IPFS_API_URL}/config?arg=API.HTTPHeaders.Access-Control-Expose-Headers&arg=["Location"]`, {
+                    method: 'POST'
+                });
+
+                // Set Allow-Credentials
+                await fetch(`${IPFS_API_URL}/config?arg=API.HTTPHeaders.Access-Control-Allow-Credentials&arg=["true"]`, {
+                    method: 'POST'
+                });
+                
+                corsResult.innerHTML = `
+                    <div class="status success">
+                        ✅ CORS configuration set successfully
+                    </div>
+                    <div class="status info">
+                        <p><strong>Important:</strong> Please restart your IPFS daemon for changes to take effect.</p>
+                        <p>For IPFS Desktop: Go to the Settings and click "Restart"</p>
+                        <p>For IPFS CLI: Stop the daemon with Ctrl+C and restart with 'ipfs daemon'</p>
+                    </div>
+                `;
+            } catch (error) {
+                corsResult.innerHTML = `
+                    <div class="status error">
+                        ❌ Failed to set CORS config: ${error.message}
+                    </div>
+                `;
+            }
+        });
+
+        // Test file upload
+        document.getElementById('uploadTest').addEventListener('click', async () => {
+            const fileInput = document.getElementById('fileUpload');
+            if (!fileInput.files.length) {
+                uploadResult.innerHTML = `
+                    <div class="status error">
+                        Please select a file first
+                    </div>
+                `;
+                return;
+            }
+
+            const file = fileInput.files[0];
+            uploadResult.innerHTML = `Uploading file ${file.name}...`;
+            
+            try {
+                const formData = new FormData();
+                formData.append('file', file);
+                
+                const response = await fetch(`${IPFS_API_URL}/add`, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`Upload failed: ${response.status} ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                uploadResult.innerHTML = `
+                    <div class="status success">
+                        ✅ File uploaded successfully!
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                        <p>You can view your file at: <a href="http://127.0.0.1:8080/ipfs/${data.Hash}" target="_blank">http://127.0.0.1:8080/ipfs/${data.Hash}</a></p>
+                    </div>
+                `;
+            } catch (error) {
+                uploadResult.innerHTML = `
+                    <div class="status error">
+                        ❌ Upload failed: ${error.message}
+                    </div>
+                    <div class="info">
+                        <p>If upload failed with a CORS error, make sure:</p>
+                        <ol>
+                            <li>CORS is properly configured (use the Set CORS button)</li>
+                            <li>You've restarted your IPFS node after setting CORS</li>
+                        </ol>
+                    </div>
+                `;
+            }
+        });
+        
+        // Check connection on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('checkConnection').click();
+        });
+    </script>
+</body>
+</html> 

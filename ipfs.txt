@@ -1,0 +1,32 @@
+Connected to IPFS
+Hosting 2 MiB of data — Discovered 16 peers
+
+Peer ID	12D3KooWNp5JabhQdHbeapJwxdQYwD2J7NV21pr84tv4GFghUeF7
+Agent	kubov0.34.1 desktop
+UI	007dbb1
+Advanced
+Gateway	http://127.0.0.1:8080
+Kubo RPC	
+/ip4/127.0.0.1/tcp/5001
+Edit
+Addresses	
+/ip4/127.0.0.1/tcp/4001/p2p/12D3KooWNp5JabhQdHbeapJwxdQYwD2J7NV21pr84tv4GFghUeF7
+/ip4/127.0.0.1/udp/4001/quic-v1/p2p/12D3KooWNp5JabhQdHbeapJwxdQYwD2J7NV21pr84tv4GFghUeF7
+/ip4/127.0.0.1/udp/4001/quic-v1/webtransport/certhash/uEiAUxrRpf2TM8vIZHAL0pCSHrC4IzajwlHb1FV2ET_iiTA/certhash/uEiDktkPnywenjCighnB5181XoKZaqAFxOKuCHCdoEnbdCg/p2p/12D3KooWNp5JabhQdHbeapJwxdQYwD2J7NV21pr84tv4GFghUeF7
+/ip4/127.0.0.1/udp/4001/webrtc-direct/certhash/uEiBVhy272ds--cJes6GBi_O3SB7eNK6YrKl3u3cAtCiLfw/p2p/12D3KooWNp5JabhQdHbeapJwxdQYwD2J7NV21pr84tv4GFghUeF7
+/ip4/152.58.0.137/udp/4001/quic-v1/p2p/12D3KooWNp5JabhQdHbeapJwxdQYwD2J7NV21pr84tv4GFghUeF7
+/ip4/152.58.0.137/udp/4001/quic-v1/webtransport/certhash/uEiAUxrRpf2TM8vIZHAL0pCSHrC4IzajwlHb1FV2ET_iiTA/certhash/uEiDktkPnywenjCighnB5181XoKZaqAFxOKuCHCdoEnbdCg/p2p/12D3KooWNp5JabhQdHbeapJwxdQYwD2J7NV21pr84tv4GFghUeF7
+/ip4/152.58.0.137/udp/4001/webrtc-direct/certhash/uEiBVhy272ds--cJes6GBi_O3SB7eNK6YrKl3u3cAtCiLfw/p2p/12D3KooWNp5JabhQdHbeapJwxdQYwD2J7NV21pr84tv4GFghUeF7
+/ip4/192.168.30.202/tcp/4001/p2p/12D3KooWNp5JabhQdHbeapJwxdQYwD2J7NV21pr84tv4GFghUeF7
+/ip4/192.168.30.202/udp/4001/quic-v1/p2p/12D3KooWNp5JabhQdHbeapJwxdQYwD2J7NV21pr84tv4GFghUeF7
+/ip4/192.168.30.202/udp/4001/quic-v1/webtransport/certhash/uEiAUxrRpf2TM8vIZHAL0pCSHrC4IzajwlHb1FV2ET_iiTA/certhash/uEiDktkPnywenjCighnB5181XoKZaqAFxOKuCHCdoEnbdCg/p2p/12D3KooWNp5JabhQdHbeapJwxdQYwD2J7NV21pr84tv4GFghUeF7
+/ip4/192.168.30.202/udp/4001/webrtc-direct/certhash/uEiBVhy272ds--cJes6GBi_O3SB7eNK6YrKl3u3cAtCiLfw/p2p/12D3KooWNp5JabhQdHbeapJwxdQYwD2J7NV21pr84tv4GFghUeF7
+/ip6/2409:40c0:2:5d22:5832:387:7dd8:1ae1/tcp/4001/p2p/12D3KooWNp5JabhQdHbeapJwxdQYwD2J7NV21pr84tv4GFghUeF7
+/ip6/2409:40c0:2:5d22:5832:387:7dd8:1ae1/udp/4001/quic-v1/p2p/12D3KooWNp5JabhQdHbeapJwxdQYwD2J7NV21pr84tv4GFghUeF7
+/ip6/2409:40c0:2:5d22:5832:387:7dd8:1ae1/udp/4001/quic-v1/webtransport/certhash/uEiAUxrRpf2TM8vIZHAL0pCSHrC4IzajwlHb1FV2ET_iiTA/certhash/uEiDktkPnywenjCighnB5181XoKZaqAFxOKuCHCdoEnbdCg/p2p/12D3KooWNp5JabhQdHbeapJwxdQYwD2J7NV21pr84tv4GFghUeF7
+/ip6/2409:40c0:2:5d22:5832:387:7dd8:1ae1/udp/4001/webrtc-direct/certhash/uEiBVhy272ds--cJes6GBi_O3SB7eNK6YrKl3u3cAtCiLfw/p2p/12D3KooWNp5JabhQdHbeapJwxdQYwD2J7NV21pr84tv4GFghUeF7
+/ip6/::1/tcp/4001/p2p/12D3KooWNp5JabhQdHbeapJwxdQYwD2J7NV21pr84tv4GFghUeF7
+/ip6/::1/udp/4001/quic-v1/p2p/12D3KooWNp5JabhQdHbeapJwxdQYwD2J7NV21pr84tv4GFghUeF7
+/ip6/::1/udp/4001/quic-v1/webtransport/certhash/uEiAUxrRpf2TM8vIZHAL0pCSHrC4IzajwlHb1FV2ET_iiTA/certhash/uEiDktkPnywenjCighnB5181XoKZaqAFxOKuCHCdoEnbdCg/p2p/12D3KooWNp5JabhQdHbeapJwxdQYwD2J7NV21pr84tv4GFghUeF7
+/ip6/::1/udp/4001/webrtc-direct/certhash/uEiBVhy272ds--cJes6GBi_O3SB7eNK6YrKl3u3cAtCiLfw/p2p/12D3KooWNp5JabhQdHbeapJwxdQYwD2J7NV21pr84tv4GFghUeF7
+Public key	CAESIMEU3F/Fsg6BciQdhkU0cTCR6lIwwkZwdyyiGUcufq9+

@@ -1,0 +1,73 @@
+# Node dependencies
+node_modules/
+package-lock.json
+yarn.lock
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Next.js
+.next/
+out/
+build/
+next-env.d.ts
+.vercel
+
+# Hardhat
+artifacts/
+cache/
+coverage/
+coverage.json
+typechain-types/
+deployments/
+.hardhat/
+
+# IPFS
+.ipfs/
+
+# IDE files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.log
+
+# Test coverage reports
+coverage/
+.nyc_output/
+
+# Compiled binaries
+dist/
+build/
+
+# Gas reporter output
+gasReporterOutput.json
+
+# Hardhat specific files
+/cache
+/artifacts
+
+# TypeChain files
+/typechain
+/typechain-types
+
+# Hardhat Ignition default folder for deployments against local node
+ignition/deployments/chain-31337
+
+# Local development data
+.local-data/
+
+# Cache files
+.cache/
+*.tsbuildinfo
