@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Skeleton } from "@/components/ui/skeleton"
 import { uploadFileToIPFS, getPublicIPFSUrl, checkIPFSConnection } from "@/lib/ipfs"
+import { uploadAndPinFile, isHashPinned } from "@/lib/ipfs-pinning"
 import { AlertCircle, Upload, Check, X, Image } from "lucide-react"
 
 interface IpfsUploadProps {
@@ -89,21 +90,47 @@ export default function IpfsUpload({
       return
     }
     
-    if (!ipfsAvailable) {
-      setError("IPFS is not available. Make sure your IPFS node is running.")
-      return
-    }
-    
     try {
       setIsUploading(true)
       setError("")
       
-      const hash = await uploadFileToIPFS(file)
+      console.log(`📤 Uploading and pinning file: ${file.name}`);
+      
+      // Try enhanced upload with pinning first
+      let hash;
+      try {
+        hash = await uploadAndPinFile(file, { 
+          pinningService: 'LOCAL',
+          metadata: {
+            filename: file.name,
+            filesize: file.size,
+            uploadedAt: new Date().toISOString()
+          }
+        });
+        console.log(`✅ File uploaded and pinned: ${hash}`);
+      } catch (pinningError) {
+        console.warn('⚠️ Enhanced upload failed, trying regular upload:', pinningError.message);
+        // Fallback to regular upload
+        hash = await uploadFileToIPFS(file);
+        console.log(`✅ File uploaded (fallback): ${hash}`);
+      }
+      
       setCid(hash)
       onUploadComplete(hash)
+      
+      // Verify the file is accessible
+      setTimeout(async () => {
+        try {
+          const isPinned = await isHashPinned(hash);
+          console.log(`📌 Pin status for ${hash}: ${isPinned ? 'Pinned' : 'Not pinned'}`);
+        } catch (e) {
+          console.warn('Could not check pin status:', e.message);
+        }
+      }, 2000);
+      
     } catch (error: any) {
       setError(`Upload failed: ${error.message}`)
-      console.error("IPFS upload error:", error)
+      console.error("❌ IPFS upload error:", error)
     } finally {
       setIsUploading(false)
     }
@@ -195,9 +222,17 @@ export default function IpfsUpload({
           )}
           
           {cid && (
-            <div className="mt-2 text-sm text-muted-foreground flex items-center">
-              <Check className="h-4 w-4 mr-2 text-green-500" />
-              Uploaded to IPFS with CID: <code className="ml-1 text-xs bg-muted px-1 py-0.5 rounded">{cid}</code>
+            <div className="mt-2 space-y-2">
+              <div className="text-sm text-muted-foreground flex items-center">
+                <Check className="h-4 w-4 mr-2 text-green-500" />
+                Uploaded to IPFS with CID: <code className="ml-1 text-xs bg-muted px-1 py-0.5 rounded">{cid}</code>
+              </div>
+              <div className="text-xs text-muted-foreground">
+                📌 File is pinned to your local IPFS node for permanent storage
+              </div>
+              <div className="text-xs text-muted-foreground">
+                🌐 Accessible via: <a href={`http://127.0.0.1:8080/ipfs/${cid}`} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">Local Gateway</a>
+              </div>
             </div>
           )}
           

@@ -11,6 +11,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import IpfsUpload from "@/components/ipfs-upload"
 import { uploadJSONToIPFS } from "@/lib/ipfs"
+import { uploadAndPinFile } from "@/lib/ipfs-pinning"
 import { ethToInr, formatCurrency } from "@/lib/currency"
 import { sendCampaignForVerification } from "@/lib/admin-service"
 import { AlertCircle, ArrowLeft, FileText, Image as ImageIcon, X, CheckCircle } from "lucide-react"
@@ -130,10 +131,32 @@ export default function CreateCampaignPage() {
         createdAt: new Date().toISOString()
       };
       
-      // Upload metadata to IPFS
-      console.log("Uploading metadata to IPFS...");
-      const metadataCid = await uploadJSONToIPFS(metadata);
-      console.log("Metadata uploaded with CID:", metadataCid);
+      // Upload metadata to IPFS with pinning
+      console.log("📤 Uploading and pinning metadata to IPFS...");
+      
+      let metadataCid;
+      try {
+        // Create a blob from the metadata JSON
+        const metadataBlob = new Blob([JSON.stringify(metadata, null, 2)], { type: 'application/json' });
+        const metadataFile = new File([metadataBlob], 'campaign-metadata.json', { type: 'application/json' });
+        
+        // Upload with pinning
+        metadataCid = await uploadAndPinFile(metadataFile, {
+          pinningService: 'LOCAL',
+          metadata: {
+            type: 'campaign-metadata',
+            campaignTitle: formData.title,
+            createdAt: new Date().toISOString()
+          }
+        });
+        
+        console.log("✅ Metadata uploaded and pinned with CID:", metadataCid);
+      } catch (pinningError) {
+        console.warn('⚠️ Enhanced metadata upload failed, trying fallback:', pinningError.message);
+        // Fallback to regular upload
+        metadataCid = await uploadJSONToIPFS(metadata);
+        console.log("✅ Metadata uploaded (fallback) with CID:", metadataCid);
+      }
       
       // Show metamask network fee warning
       if (!confirm("You will need to pay a small network fee using MetaMask to register your campaign on the blockchain. Continue?")) {

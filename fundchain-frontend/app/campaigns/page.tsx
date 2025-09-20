@@ -2,17 +2,73 @@
 
 import React, { useState, useEffect } from "react"
 import Link from "next/link"
+
+// Campaign Card Image Component with fallback handling
+function CampaignCardImage({ imageHash, title, className }) {
+  const [currentSrcIndex, setCurrentSrcIndex] = React.useState(0);
+  const [hasError, setHasError] = React.useState(false);
+  
+  // Get all possible IPFS URLs for fallback
+  const fallbackUrls = React.useMemo(() => {
+    if (!imageHash || !isValidIPFSHash(imageHash)) {
+      return [getPlaceholderImageUrl(title)];
+    }
+    
+    const ipfsUrls = getIPFSUrlsWithFallbacks(imageHash);
+    return [...ipfsUrls, getPlaceholderImageUrl(title)];
+  }, [imageHash, title]);
+  
+  const handleImageError = () => {
+    if (currentSrcIndex < fallbackUrls.length - 1) {
+      setCurrentSrcIndex(prev => prev + 1);
+    } else {
+      setHasError(true);
+    }
+  };
+  
+  if (hasError && currentSrcIndex >= fallbackUrls.length - 1) {
+    return (
+      <div className={`bg-gray-200 flex items-center justify-center ${className}`}>
+        <span className="text-gray-400">No Image</span>
+      </div>
+    );
+  }
+  
+  return (
+    <img
+      src={fallbackUrls[currentSrcIndex]}
+      alt={title}
+      className={className}
+      onError={handleImageError}
+      loading="lazy"
+    />
+  );
+}
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { formatCurrency } from "@/lib/currency"
 import { getApprovedCampaigns } from "@/lib/admin-service"
-import { getPublicIPFSUrl } from "@/lib/ipfs"
+import { getPublicIPFSUrl, getIPFSUrlsWithFallbacks, getPlaceholderImageUrl, isValidIPFSHash } from "@/lib/ipfs"
 import { Plus, Search } from "lucide-react"
 
+interface Campaign {
+  id: string
+  title: string
+  description: string
+  type: string
+  imageHash: string
+  targetAmount: string
+  targetAmountInr: string
+  status: string
+  amountRaised: string
+  percentRaised: number
+  donorCount: number
+}
+
 export default function CampaignsPage() {
-  const [campaigns, setCampaigns] = useState([])
+  const [campaigns, setCampaigns] = useState<Campaign[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
   const [searchQuery, setSearchQuery] = useState("")
@@ -28,53 +84,13 @@ export default function CampaignsPage() {
       setLoading(true)
       const approvedCampaigns = await getApprovedCampaigns()
       
-      // Add some sample campaigns if none are found
+      // Set the campaigns from blockchain/localStorage
+      setCampaigns(approvedCampaigns)
+      
       if (approvedCampaigns.length === 0) {
-        const sampleCampaigns = [
-          {
-            id: "sample-1",
-            title: "Help Ravi Fight Cancer",
-            description: "Ravi, a 12-year-old boy from Mumbai, has been diagnosed with leukemia. His family needs financial support for his treatment.",
-            type: "MEDICAL",
-            imageHash: "QmTZRVmhNi6AAuW2XwLykCyJZVcXDK2xE6oA5KG6vfbqCZ",
-            targetAmount: "1.5",
-            targetAmountInr: "325000",
-            status: "VERIFIED",
-            amountRaised: "0.975",
-            percentRaised: 65,
-            donorCount: 142
-          },
-          {
-            id: "sample-2",
-            title: "Rebuild Shiva Temple After Earthquake",
-            description: "The historic Shiva Temple in Uttarakhand was severely damaged in the recent earthquake. Help us rebuild this 500-year-old cultural heritage.",
-            type: "RELIGIOUS",
-            imageHash: "QmV2i4yCqbW9jpzG9o9GpShJ6VtbTVECcLjSgpWccVq7G6",
-            targetAmount: "2.7",
-            targetAmountInr: "750000",
-            status: "VERIFIED",
-            amountRaised: "1.0",
-            percentRaised: 38,
-            donorCount: 320
-          },
-          {
-            id: "sample-3",
-            title: "Education for 100 Rural Girls",
-            description: "Support the education of 100 girls from rural villages in Bihar. This includes school fees, books, uniforms, and transportation for one year.",
-            type: "EDUCATION",
-            imageHash: "QmPLB9yo8mQmSvK6WcXCsz7L1ZCajEoZJ9LRppAuH2Gy57",
-            targetAmount: "3.1",
-            targetAmountInr: "850000",
-            status: "VERIFIED",
-            amountRaised: "2.6",
-            percentRaised: 85,
-            donorCount: 275
-          }
-        ]
-        
-        setCampaigns(sampleCampaigns)
+        console.log("No campaigns found. Make sure contracts are deployed and campaigns are verified.")
       } else {
-        setCampaigns(approvedCampaigns)
+        console.log(`Loaded ${approvedCampaigns.length} campaigns`)
       }
     } catch (err) {
       console.error("Error loading campaigns:", err)
@@ -96,8 +112,8 @@ export default function CampaignsPage() {
   })
   
   // Helper function to format the campaign type for display
-  const formatCampaignType = (type) => {
-    const types = {
+  const formatCampaignType = (type: string) => {
+    const types: { [key: string]: string } = {
       'MEDICAL': 'Medical',
       'RELIGIOUS': 'Religious',
       'NGO': 'NGO',
@@ -177,34 +193,11 @@ export default function CampaignsPage() {
           {filteredCampaigns.map((campaign) => (
             <Card key={campaign.id} className="overflow-hidden flex flex-col">
               <div className="aspect-video w-full overflow-hidden">
-                {campaign.imageHash ? (
-                  <img
-                    src={getPublicIPFSUrl(campaign.imageHash)}
-                    alt={campaign.title}
-                    className="h-full w-full object-cover"
-                    onError={(e) => {
-                      console.log('Primary IPFS gateway failed, trying alternatives');
-                      
-                      // Try multiple public gateways as fallbacks
-                      if (!e.currentTarget.src.includes('ipfs.io')) {
-                        e.currentTarget.src = `https://ipfs.io/ipfs/${campaign.imageHash}`;
-                      } else if (!e.currentTarget.src.includes('cloudflare-ipfs.com')) {
-                        e.currentTarget.src = `https://cloudflare-ipfs.com/ipfs/${campaign.imageHash}`;
-                      } else if (!e.currentTarget.src.includes('gateway.ipfs.io')) {
-                        e.currentTarget.src = `https://gateway.ipfs.io/ipfs/${campaign.imageHash}`;
-                      } else {
-                        // If all IPFS gateways fail, use a placeholder
-                        e.currentTarget.src = 'https://placehold.co/600x400/orange/white?text=Campaign+Image';
-                        // Remove the error handler to prevent infinite loops
-                        e.currentTarget.onerror = null;
-                      }
-                    }}
-                  />
-                ) : (
-                  <div className="h-full w-full bg-gray-200 flex items-center justify-center">
-                    <span className="text-gray-400">No Image</span>
-                  </div>
-                )}
+                <CampaignCardImage 
+                  imageHash={campaign.imageHash} 
+                  title={campaign.title}
+                  className="h-full w-full object-cover"
+                />
               </div>
               
               <CardHeader className="pb-2">

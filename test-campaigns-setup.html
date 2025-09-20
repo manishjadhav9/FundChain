@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>FundChain Test Campaign Setup</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .campaign { background: #f5f5f5; padding: 15px; margin: 10px 0; border-radius: 8px; }
+        .button { background: #f97316; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; }
+        .button:hover { background: #ea580c; }
+        pre { background: #1f2937; color: #f9fafb; padding: 15px; border-radius: 5px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>🧪 FundChain Campaign Details Test Setup</h1>
+    
+    <h2>📋 Test Campaigns</h2>
+    
+    <div class="campaign">
+        <h3>help sarthak get home</h3>
+        <p><strong>ID:</strong> help-sarthak-get-home</p>
+        <p><strong>Type:</strong> RELIGIOUS</p>
+        <p><strong>Status:</strong> VERIFIED</p>
+        <p><strong>Organizer:</strong> padyatra</p>
+        <p><strong>Target:</strong> ₹1375000</p>
+    </div>
+    
+    <div class="campaign">
+        <h3>Community Development Project</h3>
+        <p><strong>ID:</strong> sample-1</p>
+        <p><strong>Type:</strong> NGO</p>
+        <p><strong>Status:</strong> VERIFIED</p>
+        <p><strong>Organizer:</strong> Community Leader</p>
+        <p><strong>Target:</strong> ₹1085000</p>
+    </div>
+    
+    
+    <h2>🚀 Setup Instructions</h2>
+    <ol>
+        <li>Click the button below to add test campaigns to localStorage</li>
+        <li>Go to <a href="http://localhost:3000/campaigns" target="_blank">http://localhost:3000/campaigns</a></li>
+        <li>Click "View Details" on any campaign</li>
+        <li>Verify that the correct campaign details are shown</li>
+    </ol>
+    
+    <button class="button" onclick="setupTestCampaigns()">
+        🏗️ Setup Test Campaigns
+    </button>
+    
+    <h2>🔗 Direct Test Links</h2>
+    <ul>
+        <li><a href="http://localhost:3000/campaigns/help-sarthak-get-home" target="_blank">help sarthak get home</a></li>
+        <li><a href="http://localhost:3000/campaigns/sample-1" target="_blank">Community Development Project</a></li>
+    </ul>
+    
+    <h2>📝 localStorage Code</h2>
+    <p>If the button doesn't work, copy and paste this code in your browser console:</p>
+    <pre id="localStorageCode">localStorage.setItem("fundchain-approved-campaigns", JSON.stringify([
+  {
+    "id": "help-sarthak-get-home",
+    "title": "help sarthak get home",
+    "description": "Help Sarthak return home safely. He needs financial support for travel and accommodation expenses. This campaign aims to raise funds for his journey back home.",
+    "type": "RELIGIOUS",
+    "imageHash": "QmX2DiQ53iJAgWDXRCDyibXtnxpyRDdV1EbogtPAH88Hnk",
+    "imageCid": "QmX2DiQ53iJAgWDXRCDyibXtnxpyRDdV1EbogtPAH88Hnk",
+    "targetAmount": "13.75",
+    "targetAmountInr": "1375000",
+    "status": "VERIFIED",
+    "amountRaised": "0",
+    "raisedAmount": "0",
+    "raisedAmountInr": "0",
+    "percentRaised": 0,
+    "donorCount": 0,
+    "createdAt": "2025-09-20T22:13:24.133Z",
+    "updatedAt": "2025-09-20T22:13:24.134Z",
+    "submittedAt": "2025-09-20T22:13:24.134Z",
+    "verifiedAt": "2025-09-20T22:13:24.134Z",
+    "owner": "0x1234567890123456789012345678901234567890",
+    "contractAddress": "0x1234567890123456789012345678901234567890",
+    "documentHashes": [
+      "QmTfUcm6XD8qzoDQLK3MTd7wSTNcbXYyhDdCnDDs4dwNep"
+    ],
+    "documentCids": [
+      "QmTfUcm6XD8qzoDQLK3MTd7wSTNcbXYyhDdCnDDs4dwNep"
+    ],
+    "organizer": {
+      "name": "padyatra",
+      "role": "Campaign Organizer",
+      "contact": "padyatra@example.com"
+    },
+    "organizerName": "padyatra",
+    "organizerRole": "Campaign Organizer",
+    "organizerContact": "padyatra@example.com"
+  },
+  {
+    "id": "sample-1",
+    "title": "Community Development Project",
+    "description": "Supporting local community development initiatives and infrastructure improvements.",
+    "type": "NGO",
+    "imageHash": "QmX2DiQ53iJAgWDXRCDyibXtnxpyRDdV1EbogtPAH88Hnk",
+    "imageCid": "QmX2DiQ53iJAgWDXRCDyibXtnxpyRDdV1EbogtPAH88Hnk",
+    "targetAmount": "5.0",
+    "targetAmountInr": "1085000",
+    "status": "VERIFIED",
+    "amountRaised": "2.1",
+    "raisedAmount": "2.1",
+    "raisedAmountInr": "455700",
+    "percentRaised": 42,
+    "donorCount": 156,
+    "createdAt": "2025-08-21T22:13:24.134Z",
+    "updatedAt": "2025-09-15T22:13:24.134Z",
+    "submittedAt": "2025-08-21T22:13:24.134Z",
+    "verifiedAt": "2025-08-26T22:13:24.134Z",
+    "owner": "0x2345678901234567890123456789012345678901",
+    "contractAddress": "0x2345678901234567890123456789012345678901",
+    "documentHashes": [
+      "QmTfUcm6XD8qzoDQLK3MTd7wSTNcbXYyhDdCnDDs4dwNep"
+    ],
+    "documentCids": [
+      "QmTfUcm6XD8qzoDQLK3MTd7wSTNcbXYyhDdCnDDs4dwNep"
+    ],
+    "organizer": {
+      "name": "Community Leader",
+      "role": "NGO Representative",
+      "contact": "community@example.com"
+    },
+    "organizerName": "Community Leader",
+    "organizerRole": "NGO Representative",
+    "organizerContact": "community@example.com"
+  }
+]));</pre>
+    
+    <script>
+        function setupTestCampaigns() {
+            const campaigns = [{"id":"help-sarthak-get-home","title":"help sarthak get home","description":"Help Sarthak return home safely. He needs financial support for travel and accommodation expenses. This campaign aims to raise funds for his journey back home.","type":"RELIGIOUS","imageHash":"QmX2DiQ53iJAgWDXRCDyibXtnxpyRDdV1EbogtPAH88Hnk","imageCid":"QmX2DiQ53iJAgWDXRCDyibXtnxpyRDdV1EbogtPAH88Hnk","targetAmount":"13.75","targetAmountInr":"1375000","status":"VERIFIED","amountRaised":"0","raisedAmount":"0","raisedAmountInr":"0","percentRaised":0,"donorCount":0,"createdAt":"2025-09-20T22:13:24.133Z","updatedAt":"2025-09-20T22:13:24.134Z","submittedAt":"2025-09-20T22:13:24.134Z","verifiedAt":"2025-09-20T22:13:24.134Z","owner":"0x1234567890123456789012345678901234567890","contractAddress":"0x1234567890123456789012345678901234567890","documentHashes":["QmTfUcm6XD8qzoDQLK3MTd7wSTNcbXYyhDdCnDDs4dwNep"],"documentCids":["QmTfUcm6XD8qzoDQLK3MTd7wSTNcbXYyhDdCnDDs4dwNep"],"organizer":{"name":"padyatra","role":"Campaign Organizer","contact":"padyatra@example.com"},"organizerName":"padyatra","organizerRole":"Campaign Organizer","organizerContact":"padyatra@example.com"},{"id":"sample-1","title":"Community Development Project","description":"Supporting local community development initiatives and infrastructure improvements.","type":"NGO","imageHash":"QmX2DiQ53iJAgWDXRCDyibXtnxpyRDdV1EbogtPAH88Hnk","imageCid":"QmX2DiQ53iJAgWDXRCDyibXtnxpyRDdV1EbogtPAH88Hnk","targetAmount":"5.0","targetAmountInr":"1085000","status":"VERIFIED","amountRaised":"2.1","raisedAmount":"2.1","raisedAmountInr":"455700","percentRaised":42,"donorCount":156,"createdAt":"2025-08-21T22:13:24.134Z","updatedAt":"2025-09-15T22:13:24.134Z","submittedAt":"2025-08-21T22:13:24.134Z","verifiedAt":"2025-08-26T22:13:24.134Z","owner":"0x2345678901234567890123456789012345678901","contractAddress":"0x2345678901234567890123456789012345678901","documentHashes":["QmTfUcm6XD8qzoDQLK3MTd7wSTNcbXYyhDdCnDDs4dwNep"],"documentCids":["QmTfUcm6XD8qzoDQLK3MTd7wSTNcbXYyhDdCnDDs4dwNep"],"organizer":{"name":"Community Leader","role":"NGO Representative","contact":"community@example.com"},"organizerName":"Community Leader","organizerRole":"NGO Representative","organizerContact":"community@example.com"}];
+            localStorage.setItem("fundchain-approved-campaigns", JSON.stringify(campaigns));
+            alert("✅ Test campaigns added to localStorage!\n\nNow go to http://localhost:3000/campaigns and test the View Details buttons.");
+        }
+        
+        // Auto-setup on page load
+        window.addEventListener('load', function() {
+            console.log('🧪 FundChain Test Setup Ready');
+            console.log('Click the setup button to add test campaigns to localStorage');
+        });
+    </script>
+</body>
+</html>

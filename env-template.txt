@@ -1,0 +1,30 @@
+# FundChain Environment Variables Template
+# Copy this to .env.local in your fundchain-frontend directory
+
+# IPFS Pinning Services (Optional - for production)
+# Choose one or more pinning services for redundancy
+
+# Pinata (Paid service, very reliable)
+# Sign up at: https://pinata.cloud
+# NEXT_PUBLIC_PINATA_API_KEY=your_pinata_api_key_here
+# NEXT_PUBLIC_PINATA_SECRET_KEY=your_pinata_secret_key_here
+
+# Web3.Storage (Free service)
+# Sign up at: https://web3.storage
+# NEXT_PUBLIC_WEB3_STORAGE_TOKEN=your_web3_storage_token_here
+
+# NFT.Storage (Free for NFTs and metadata)
+# Sign up at: https://nft.storage
+# NEXT_PUBLIC_NFT_STORAGE_TOKEN=your_nft_storage_token_here
+
+# Local IPFS Configuration (Already configured)
+# Your local IPFS node is running on:
+# API: http://127.0.0.1:5001
+# Gateway: http://127.0.0.1:8080
+# Web UI: http://127.0.0.1:5001/webui
+
+# Instructions:
+# 1. Copy this file to fundchain-frontend/.env.local
+# 2. Uncomment and fill in the API keys for any pinning services you want to use
+# 3. For development, your local IPFS node is sufficient
+# 4. For production, consider using at least one pinning service for redundancy
