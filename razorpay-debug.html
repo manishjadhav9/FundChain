@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Razorpay Debug Test</title>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; }
+        .button { background: #f97316; color: white; padding: 15px 30px; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; }
+        .button:hover { background: #ea580c; }
+        .status { margin: 20px 0; padding: 15px; border-radius: 5px; }
+        .success { background: #d1fae5; color: #065f46; }
+        .error { background: #fee2e2; color: #991b1b; }
+        .info { background: #dbeafe; color: #1e40af; }
+    </style>
+</head>
+<body>
+    <h1>🔧 Razorpay Debug Test</h1>
+    
+    <div id="status" class="status info">
+        Click the button below to test Razorpay payment gateway
+    </div>
+    
+    <button class="button" onclick="testRazorpayPayment()">
+        💳 Test Razorpay Payment
+    </button>
+    
+    <h2>Debug Information</h2>
+    <div id="debug-info"></div>
+    
+    <script>
+        function updateStatus(message, type = 'info') {
+            const statusDiv = document.getElementById('status');
+            statusDiv.textContent = message;
+            statusDiv.className = 'status ' + type;
+        }
+        
+        function addDebugInfo(info) {
+            const debugDiv = document.getElementById('debug-info');
+            debugDiv.innerHTML += '<p>' + info + '</p>';
+        }
+        
+        // Check if Razorpay is loaded
+        window.addEventListener('load', function() {
+            if (typeof Razorpay !== 'undefined') {
+                addDebugInfo('✅ Razorpay SDK loaded successfully');
+                updateStatus('Razorpay SDK is ready. Click the button to test payment.', 'success');
+            } else {
+                addDebugInfo('❌ Razorpay SDK not loaded');
+                updateStatus('Error: Razorpay SDK failed to load', 'error');
+            }
+        });
+        
+        function testRazorpayPayment() {
+            if (typeof Razorpay === 'undefined') {
+                updateStatus('Error: Razorpay SDK not loaded', 'error');
+                return;
+            }
+            
+            updateStatus('Opening Razorpay payment gateway...', 'info');
+            
+            const options = {
+                key: 'rzp_test_RJuwxk8NAGp7Dc',
+                amount: 10000, // ₹100 in paise
+                currency: 'INR',
+                name: 'FundChain Debug Test',
+                description: 'Test payment for debugging',
+                handler: function (response) {
+                    updateStatus('Payment successful! Payment ID: ' + response.razorpay_payment_id, 'success');
+                    addDebugInfo('✅ Payment ID: ' + response.razorpay_payment_id);
+                },
+                prefill: {
+                    name: 'Test User',
+                    email: 'test@example.com',
+                    contact: '9999999999'
+                },
+                theme: {
+                    color: '#f97316'
+                },
+                modal: {
+                    ondismiss: function() {
+                        updateStatus('Payment cancelled by user', 'error');
+                        addDebugInfo('⚠️ Payment was cancelled');
+                    }
+                }
+            };
+            
+            try {
+                const rzp = new Razorpay(options);
+                rzp.open();
+                addDebugInfo('🚀 Razorpay payment gateway opened');
+            } catch (error) {
+                updateStatus('Error opening payment gateway: ' + error.message, 'error');
+                addDebugInfo('❌ Error: ' + error.message);
+            }
+        }
+    </script>
+</body>
+</html>

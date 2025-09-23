@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Razorpay Amount Test</title>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; }
+        .form-group { margin: 15px 0; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; }
+        .button { background: #f97316; color: white; padding: 15px 30px; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; width: 100%; }
+        .button:hover { background: #ea580c; }
+        .button:disabled { background: #ccc; cursor: not-allowed; }
+        .status { margin: 20px 0; padding: 15px; border-radius: 5px; }
+        .success { background: #d1fae5; color: #065f46; }
+        .error { background: #fee2e2; color: #991b1b; }
+        .info { background: #dbeafe; color: #1e40af; }
+        .test-cases { margin: 20px 0; }
+        .test-case { padding: 10px; margin: 5px 0; border: 1px solid #ddd; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <h1>🔧 Razorpay Amount Validation Test</h1>
+    
+    <div id="status" class="status info">
+        Enter an amount to test Razorpay payment with proper formatting
+    </div>
+    
+    <div class="form-group">
+        <label for="amount">Donation Amount (₹):</label>
+        <input type="number" id="amount" placeholder="Enter amount in INR (min ₹1)" min="1" max="1000000" step="1" value="100">
+        <small>Amount will be converted to paise: <span id="paise">10000</span> paise</small>
+    </div>
+    
+    <button class="button" onclick="testPayment()">
+        💳 Test Payment
+    </button>
+    
+    <div class="test-cases">
+        <h3>Test Cases:</h3>
+        <div class="test-case">
+            <button onclick="testAmount(1)">Test ₹1 (100 paise)</button>
+            <button onclick="testAmount(0.5)">Test ₹0.5 (50 paise - should fail)</button>
+            <button onclick="testAmount(100)">Test ₹100 (10000 paise)</button>
+            <button onclick="testAmount(1000.50)">Test ₹1000.50 (100050 paise)</button>
+        </div>
+    </div>
+    
+    <div id="debug-info"></div>
+    
+    <script>
+        function updateStatus(message, type = 'info') {
+            const statusDiv = document.getElementById('status');
+            statusDiv.textContent = message;
+            statusDiv.className = 'status ' + type;
+        }
+        
+        function addDebugInfo(info) {
+            const debugDiv = document.getElementById('debug-info');
+            debugDiv.innerHTML += '<p>' + info + '</p>';
+        }
+        
+        function updatePaise() {
+            const amount = parseFloat(document.getElementById('amount').value) || 0;
+            const paise = Math.round(amount * 100);
+            document.getElementById('paise').textContent = paise;
+            
+            if (paise < 100) {
+                document.getElementById('paise').style.color = 'red';
+                document.getElementById('paise').textContent += ' (Invalid - minimum 100 paise)';
+            } else {
+                document.getElementById('paise').style.color = 'green';
+            }
+        }
+        
+        function testAmount(amount) {
+            document.getElementById('amount').value = amount;
+            updatePaise();
+        }
+        
+        function testPayment() {
+            const amount = parseFloat(document.getElementById('amount').value);
+            
+            if (!amount || amount <= 0) {
+                updateStatus('Please enter a valid amount', 'error');
+                return;
+            }
+            
+            const amountInPaise = Math.round(amount * 100);
+            
+            if (amountInPaise < 100) {
+                updateStatus('Minimum donation amount is ₹1 (100 paise)', 'error');
+                return;
+            }
+            
+            if (typeof Razorpay === 'undefined') {
+                updateStatus('Razorpay SDK not loaded', 'error');
+                return;
+            }
+            
+            updateStatus('Opening Razorpay with amount: ₹' + amount + ' (' + amountInPaise + ' paise)', 'info');
+            addDebugInfo('💰 Testing payment: ₹' + amount + ' = ' + amountInPaise + ' paise');
+            
+            const options = {
+                key: 'rzp_test_RJuwxk8NAGp7Dc',
+                amount: amountInPaise, // Amount in paise (integer)
+                currency: 'INR',
+                name: 'FundChain Amount Test',
+                description: 'Testing amount formatting: ₹' + amount,
+                handler: function (response) {
+                    updateStatus('Payment successful! Payment ID: ' + response.razorpay_payment_id, 'success');
+                    addDebugInfo('✅ Payment successful: ' + response.razorpay_payment_id);
+                },
+                prefill: {
+                    name: 'Test User',
+                    email: 'test@fundchain.com',
+                    contact: '9999999999'
+                },
+                theme: {
+                    color: '#f97316'
+                },
+                modal: {
+                    ondismiss: function() {
+                        updateStatus('Payment cancelled', 'error');
+                        addDebugInfo('⚠️ Payment cancelled by user');
+                    }
+                }
+            };
+            
+            try {
+                const rzp = new Razorpay(options);
+                rzp.open();
+                addDebugInfo('🚀 Razorpay opened with ' + amountInPaise + ' paise');
+            } catch (error) {
+                updateStatus('Error: ' + error.message, 'error');
+                addDebugInfo('❌ Error: ' + error.message);
+            }
+        }
+        
+        // Update paise display when amount changes
+        document.getElementById('amount').addEventListener('input', updatePaise);
+        
+        // Initial update
+        updatePaise();
+        
+        // Check if Razorpay is loaded
+        window.addEventListener('load', function() {
+            if (typeof Razorpay !== 'undefined') {
+                addDebugInfo('✅ Razorpay SDK loaded successfully');
+            } else {
+                addDebugInfo('❌ Razorpay SDK not loaded');
+                updateStatus('Error: Razorpay SDK failed to load', 'error');
+            }
+        });
+    </script>
+</body>
+</html>

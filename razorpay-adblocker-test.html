@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Razorpay Ad Blocker Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .status {
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 8px;
+            font-weight: bold;
+        }
+        .success { background: #d1fae5; color: #065f46; border: 2px solid #10b981; }
+        .error { background: #fee2e2; color: #991b1b; border: 2px solid #ef4444; }
+        .warning { background: #fef3c7; color: #92400e; border: 2px solid #f59e0b; }
+        .info { background: #dbeafe; color: #1e40af; border: 2px solid #3b82f6; }
+        
+        .button {
+            background: #f97316;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+            transition: background 0.3s;
+        }
+        .button:hover { background: #ea580c; }
+        .button:disabled { 
+            background: #d1d5db; 
+            color: #6b7280; 
+            cursor: not-allowed; 
+        }
+        
+        .test-section {
+            background: #f9fafb;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+        }
+        
+        .debug-info {
+            background: #1f2937;
+            color: #f9fafb;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 14px;
+            max-height: 300px;
+            overflow-y: auto;
+            margin: 20px 0;
+        }
+        
+        .indicator {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            margin: 0 10px;
+        }
+        .indicator.loading { background: #fef3c7; color: #92400e; }
+        .indicator.ready { background: #d1fae5; color: #065f46; }
+        .indicator.blocked { background: #fee2e2; color: #991b1b; }
+    </style>
+</head>
+<body>
+    <h1>🛡️ Razorpay Ad Blocker Test</h1>
+    
+    <div id="status" class="status info">
+        Testing Razorpay SDK loading and ad blocker detection...
+    </div>
+    
+    <div class="test-section">
+        <h2>🔍 Razorpay Status</h2>
+        <p>
+            <strong>SDK Status:</strong> 
+            <span id="sdk-indicator" class="indicator loading">Loading...</span>
+        </p>
+        <p><strong>Load Time:</strong> <span id="load-time">Measuring...</span></p>
+        <p><strong>Error Details:</strong> <span id="error-details">None</span></p>
+    </div>
+    
+    <div class="test-section">
+        <h2>🧪 Test Payment</h2>
+        <p>Click the button below to test if Razorpay payment gateway opens:</p>
+        
+        <input type="number" id="amount" placeholder="Enter amount (₹)" value="100" min="1" 
+               style="padding: 10px; margin: 10px 5px; border: 1px solid #d1d5db; border-radius: 5px;">
+        
+        <br>
+        
+        <button id="test-payment" class="button" disabled>
+            💳 Test Payment Gateway
+        </button>
+        
+        <button id="reload-sdk" class="button">
+            🔄 Reload SDK
+        </button>
+    </div>
+    
+    <div class="test-section">
+        <h2>🔧 Troubleshooting</h2>
+        <div id="troubleshooting">
+            <p>⏳ Running diagnostics...</p>
+        </div>
+    </div>
+    
+    <div class="debug-info" id="debug-log">
+        <strong>Debug Log:</strong><br>
+        Initializing test...
+    </div>
+    
+    <script>
+        let startTime = Date.now();
+        let razorpayLoaded = false;
+        let loadError = null;
+        
+        function log(message) {
+            const debugLog = document.getElementById('debug-log');
+            const timestamp = new Date().toLocaleTimeString();
+            debugLog.innerHTML += `<br>[${timestamp}] ${message}`;
+            debugLog.scrollTop = debugLog.scrollHeight;
+            console.log(message);
+        }
+        
+        function updateStatus(message, type = 'info') {
+            const statusDiv = document.getElementById('status');
+            statusDiv.textContent = message;
+            statusDiv.className = `status ${type}`;
+        }
+        
+        function updateIndicator(status, error = null) {
+            const indicator = document.getElementById('sdk-indicator');
+            const loadTimeSpan = document.getElementById('load-time');
+            const errorDetails = document.getElementById('error-details');
+            const testButton = document.getElementById('test-payment');
+            
+            const loadTime = Date.now() - startTime;
+            loadTimeSpan.textContent = `${loadTime}ms`;
+            
+            switch(status) {
+                case 'loading':
+                    indicator.textContent = 'Loading...';
+                    indicator.className = 'indicator loading';
+                    testButton.disabled = true;
+                    break;
+                case 'ready':
+                    indicator.textContent = 'Ready ✅';
+                    indicator.className = 'indicator ready';
+                    testButton.disabled = false;
+                    errorDetails.textContent = 'None';
+                    break;
+                case 'blocked':
+                    indicator.textContent = 'Blocked ❌';
+                    indicator.className = 'indicator blocked';
+                    testButton.disabled = true;
+                    errorDetails.textContent = error || 'Ad blocker detected';
+                    break;
+            }
+        }
+        
+        function loadRazorpaySDK() {
+            return new Promise((resolve, reject) => {
+                log('🔄 Starting Razorpay SDK load...');
+                
+                if (typeof window.Razorpay !== 'undefined') {
+                    log('✅ Razorpay SDK already loaded');
+                    resolve();
+                    return;
+                }
+                
+                const script = document.createElement('script');
+                script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+                script.async = true;
+                
+                const timeout = setTimeout(() => {
+                    log('❌ Razorpay SDK loading timeout (10s)');
+                    reject(new Error('Loading timeout - likely blocked by ad blocker'));
+                }, 10000);
+                
+                script.onload = () => {
+                    clearTimeout(timeout);
+                    if (typeof window.Razorpay !== 'undefined') {
+                        log('✅ Razorpay SDK loaded successfully');
+                        resolve();
+                    } else {
+                        log('❌ Razorpay SDK loaded but window.Razorpay is undefined');
+                        reject(new Error('SDK loaded but not available'));
+                    }
+                };
+                
+                script.onerror = (error) => {
+                    clearTimeout(timeout);
+                    log('❌ Razorpay SDK failed to load - blocked by ad blocker');
+                    reject(new Error('Failed to load - blocked by ad blocker or network issue'));
+                };
+                
+                document.head.appendChild(script);
+                log('📡 Razorpay SDK script added to page');
+            });
+        }
+        
+        function testPayment() {
+            const amount = document.getElementById('amount').value;
+            const amountInPaise = Math.round(parseFloat(amount) * 100);
+            
+            if (!amount || amountInPaise < 100) {
+                alert('Please enter a valid amount (minimum ₹1)');
+                return;
+            }
+            
+            if (!razorpayLoaded) {
+                alert('Razorpay SDK is not loaded. Please check for ad blockers.');
+                return;
+            }
+            
+            log(`💳 Testing payment for ₹${amount} (${amountInPaise} paise)`);
+            
+            const options = {
+                key: 'rzp_test_RJuwxk8NAGp7Dc',
+                amount: amountInPaise,
+                currency: 'INR',
+                name: 'FundChain Ad Blocker Test',
+                description: `Test payment for ₹${amount}`,
+                handler: function (response) {
+                    log(`✅ Payment successful: ${response.razorpay_payment_id}`);
+                    updateStatus('Payment test successful! 🎉', 'success');
+                },
+                prefill: {
+                    name: 'Test User',
+                    email: 'test@fundchain.com',
+                    contact: '9999999999'
+                },
+                theme: {
+                    color: '#f97316'
+                },
+                modal: {
+                    ondismiss: function() {
+                        log('⚠️ Payment cancelled by user');
+                        updateStatus('Payment test cancelled', 'warning');
+                    }
+                }
+            };
+            
+            try {
+                const rzp = new Razorpay(options);
+                rzp.open();
+                log('🚀 Razorpay payment modal opened');
+                updateStatus('Payment gateway opened successfully! Test with card: 4111 1111 1111 1111', 'success');
+            } catch (error) {
+                log(`❌ Error opening payment gateway: ${error.message}`);
+                updateStatus('Error opening payment gateway: ' + error.message, 'error');
+            }
+        }
+        
+        function generateTroubleshooting() {
+            const troubleshootingDiv = document.getElementById('troubleshooting');
+            
+            if (razorpayLoaded) {
+                troubleshootingDiv.innerHTML = `
+                    <p>✅ <strong>Razorpay SDK loaded successfully!</strong></p>
+                    <p>Your browser and network configuration are working correctly.</p>
+                    <p>You can now test payments using the button above.</p>
+                `;
+            } else {
+                troubleshootingDiv.innerHTML = `
+                    <p>❌ <strong>Razorpay SDK failed to load</strong></p>
+                    <p><strong>Likely causes:</strong></p>
+                    <ul>
+                        <li>🛡️ Ad blocker (uBlock Origin, AdBlock Plus, etc.)</li>
+                        <li>🔒 Browser privacy extensions</li>
+                        <li>🌐 Network firewall or proxy</li>
+                        <li>🏢 Corporate security software</li>
+                    </ul>
+                    <p><strong>Solutions to try:</strong></p>
+                    <ol>
+                        <li><strong>Disable ad blocker</strong> for this page and refresh</li>
+                        <li><strong>Use incognito/private mode</strong> (Ctrl+Shift+N)</li>
+                        <li><strong>Try a different browser</strong> (Chrome, Firefox, Safari)</li>
+                        <li><strong>Disable browser extensions</strong> temporarily</li>
+                        <li><strong>Check network settings</strong> if on corporate network</li>
+                    </ol>
+                    <p><strong>Error details:</strong> ${loadError || 'Unknown error'}</p>
+                `;
+            }
+        }
+        
+        // Initialize test
+        async function runTest() {
+            log('🧪 Starting Razorpay ad blocker test');
+            updateStatus('Loading Razorpay SDK...', 'info');
+            updateIndicator('loading');
+            
+            try {
+                await loadRazorpaySDK();
+                razorpayLoaded = true;
+                log('🎉 Test completed successfully');
+                updateStatus('Razorpay SDK loaded successfully! Payment gateway is ready.', 'success');
+                updateIndicator('ready');
+            } catch (error) {
+                razorpayLoaded = false;
+                loadError = error.message;
+                log(`💥 Test failed: ${error.message}`);
+                updateStatus('Razorpay SDK failed to load - likely blocked by ad blocker', 'error');
+                updateIndicator('blocked', error.message);
+            }
+            
+            generateTroubleshooting();
+        }
+        
+        // Event listeners
+        document.getElementById('test-payment').addEventListener('click', testPayment);
+        document.getElementById('reload-sdk').addEventListener('click', () => {
+            location.reload();
+        });
+        
+        // Start test when page loads
+        window.addEventListener('load', runTest);
+        
+        log('🚀 Ad blocker test initialized');
+    </script>
+</body>
+</html>

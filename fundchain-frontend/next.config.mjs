@@ -9,8 +9,8 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
-  // Handle IPFS dependencies properly
-  webpack: (config, { isServer }) => {
+  // Handle IPFS dependencies properly and chunk loading errors
+  webpack: (config, { isServer, dev }) => {
     // Fixes npm packages that depend on `fetch` API
     if (!isServer) {
       config.resolve.fallback = {
@@ -30,6 +30,15 @@ const nextConfig = {
         replace: 'const fetch = (typeof window !== "undefined" ? window.fetch.bind(window) : require("node-fetch"))',
       },
     });
+
+    // Improve chunk loading reliability
+    if (!isServer && !dev) {
+      // Add retry logic for chunk loading
+      config.output.chunkLoadTimeout = 30000; // 30 seconds timeout
+      
+      // Ensure consistent chunk naming
+      config.output.chunkFilename = 'static/chunks/[name].[contenthash].js';
+    }
 
     return config;
   },
