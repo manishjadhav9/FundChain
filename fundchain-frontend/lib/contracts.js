@@ -36,7 +36,7 @@ const FundCampaignABI = [
 // Contract addresses (these will be populated after deployment)
 // Deployed contract addresses would typically be stored in a config file or environment variables
 // For development, we'll use placeholder values
-const FUND_FACTORY_ADDRESS = '0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9';  // Updated with actual deployed contract address
+const FUND_FACTORY_ADDRESS = '0x5FbDB2315678afecb367f032d93F642f64180aa3';  // Updated with actual deployed contract address
 
 // Initialize provider
 export async function getProvider() {

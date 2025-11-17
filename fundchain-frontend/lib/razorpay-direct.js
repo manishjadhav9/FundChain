@@ -80,8 +80,8 @@ export function loadRazorpaySDK() {
 }
 
 /**
- * Direct donation processing without server-side order creation
- * This method bypasses server-side API issues entirely
+ * Direct donation processing WITH server-side order creation
+ * This method creates a proper Razorpay order first
  */
 export async function processDonationDirect({
   campaignId,
@@ -91,14 +91,14 @@ export async function processDonationDirect({
   donorEmail = 'donor@example.com'
 }) {
   try {
-    console.log(`💰 Processing direct donation of ₹${amountINR} for campaign: ${campaignTitle}`);
+    console.log(`💰 Processing donation of ₹${amountINR} for campaign: ${campaignTitle}`);
     
     const ethAmount = convertINRToETH(amountINR);
     console.log(`🔄 Converting ₹${amountINR} to ${ethAmount} ETH`);
     
     // Ensure Razorpay SDK is loaded
     await loadRazorpaySDK();
-    console.log('✅ Razorpay SDK loaded, initializing direct payment...');
+    console.log('✅ Razorpay SDK loaded');
     
     // Validate amount
     const amountInPaise = Math.round(amountINR * 100);
@@ -108,11 +108,35 @@ export async function processDonationDirect({
     
     console.log(`💰 Payment amount: ₹${amountINR} = ${amountInPaise} paise`);
     
+    // Create Razorpay order via API
+    console.log('📝 Creating Razorpay order...');
+    const orderResponse = await fetch('/api/payments/create-order', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        amount: amountINR,
+        currency: 'INR',
+        campaignId,
+        campaignTitle
+      })
+    });
+    
+    if (!orderResponse.ok) {
+      const errorData = await orderResponse.json();
+      throw new Error(errorData.error || 'Failed to create payment order');
+    }
+    
+    const orderData = await orderResponse.json();
+    console.log('✅ Razorpay order created:', orderData.orderId);
+    
     return new Promise((resolve, reject) => {
       const options = {
-        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || 'rzp_test_RJuwxk8NAGp7Dc',
-        amount: amountInPaise,
-        currency: 'INR',
+        key: orderData.key || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || 'rzp_test_RUE7U75NdjxIGM',
+        amount: orderData.amount,
+        currency: orderData.currency,
+        order_id: orderData.orderId,
         name: 'FundChain',
         description: `Donation for: ${campaignTitle}`,
         image: '/logo.png',
@@ -131,14 +155,15 @@ export async function processDonationDirect({
             const result = {
               success: true,
               paymentId: response.razorpay_payment_id,
-              orderId: `direct_${Date.now()}`,
+              orderId: response.razorpay_order_id || orderData.orderId,
+              signature: response.razorpay_signature,
               transactionHash: mockTxHash,
               amountINR,
               ethAmount,
               campaignId,
               timestamp: new Date().toISOString(),
-              message: 'Donation successful! (Direct payment)',
-              method: 'direct'
+              message: 'Donation successful!',
+              method: 'razorpay'
             };
             
             console.log('✅ Direct payment processing complete:', result);

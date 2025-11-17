@@ -3,13 +3,14 @@
 import { useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { useEffect } from "react"
+import { use, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { allCampaigns } from "@/lib/data"
 import { CheckCircle, Download, Share2 } from "lucide-react"
 
-export default function ThankYouPage({ params }: { params: { id: string } }) {
+export default function ThankYouPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params)
   const router = useRouter()
   const searchParams = useSearchParams()
   const amount = searchParams.get("amount") || "0"
@@ -18,13 +19,13 @@ export default function ThankYouPage({ params }: { params: { id: string } }) {
   // Auto-redirect to campaign details page after 5 seconds
   useEffect(() => {
     const redirectTimer = setTimeout(() => {
-      router.push(`/campaigns/${params.id}`);
+      router.push(`/campaigns/${id}`);
     }, 5000);
     
     return () => clearTimeout(redirectTimer);
-  }, [params.id, router]);
+  }, [id, router]);
 
-  const campaign = allCampaigns.find((c) => c.id === params.id)
+  const campaign = allCampaigns.find((c) => c.id === id)
 
   if (!campaign) {
     return (

@@ -4,7 +4,7 @@ async function main() {
   console.log("Testing getAllCampaigns function...");
   
   // Get the deployed contract address
-  const fundFactoryAddress = "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9";
+  const fundFactoryAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
   
   // Get contract instance
   const FundFactory = await hre.ethers.getContractFactory("FundFactory");

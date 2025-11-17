@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { use, useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
@@ -123,12 +123,13 @@ const getCampaignDetails = (id: string) => {
   }
 }
 
-export default function AdminCampaignDetailsPage({ params }: { params: { id: string } }) {
+export default function AdminCampaignDetailsPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params)
   const router = useRouter()
   const { toast } = useToast()
   const { user, isAdmin } = useAuth()
   const [activeTab, setActiveTab] = useState("overview")
-  const [campaign, setCampaign] = useState(getCampaignDetails(params.id))
+  const [campaign, setCampaign] = useState(getCampaignDetails(id))
   const [loading, setLoading] = useState(false)
   const [showVerificationDialog, setShowVerificationDialog] = useState(false)
   const [showRejectionDialog, setShowRejectionDialog] = useState(false)
@@ -139,7 +140,7 @@ export default function AdminCampaignDetailsPage({ params }: { params: { id: str
   // Redirect if not admin
   useEffect(() => {
     if (!user) {
-      router.push("/auth/login?redirect=/admin/campaigns/" + params.id)
+      router.push("/auth/login?redirect=/admin/campaigns/" + id)
     } else if (!isAdmin) {
       router.push("/dashboard")
       toast({
@@ -148,16 +149,16 @@ export default function AdminCampaignDetailsPage({ params }: { params: { id: str
         variant: "destructive",
       })
     }
-  }, [user, isAdmin, router, params.id, toast])
+  }, [user, isAdmin, router, id, toast])
 
   // Fetch real campaign data from blockchain when available
   useEffect(() => {
     const fetchCampaignData = async () => {
       try {
         // Only attempt to fetch if the ID looks like an Ethereum address
-        if (params.id && params.id.startsWith('0x') && params.id.length === 42) {
+        if (id && id.startsWith('0x') && id.length === 42) {
           setLoading(true);
-          const campaignData = await getCampaign(params.id);
+          const campaignData = await getCampaign(id);
           if (campaignData) {
             setCampaign({
               ...campaignData,
@@ -175,7 +176,7 @@ export default function AdminCampaignDetailsPage({ params }: { params: { id: str
     };
 
     fetchCampaignData();
-  }, [params.id]);
+  }, [id]);
 
   if (!user || !isAdmin) {
     return null
@@ -206,7 +207,7 @@ export default function AdminCampaignDetailsPage({ params }: { params: { id: str
       });
       
       // No MetaMask popup or transaction will happen
-      await verifyCampaign(params.id);
+      await verifyCampaign(id);
       
       toast({
         title: "Campaign Verified Successfully",
@@ -215,7 +216,7 @@ export default function AdminCampaignDetailsPage({ params }: { params: { id: str
       });
       
       // Refresh campaign data
-      const updatedCampaign = await getCampaign(params.id);
+      const updatedCampaign = await getCampaign(id);
       setCampaign(updatedCampaign);
       setShowVerificationDialog(false);
     } catch (error: any) {

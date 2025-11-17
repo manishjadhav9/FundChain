@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { use, useState } from "react"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
 import Link from "next/link"
@@ -17,7 +17,8 @@ import { allCampaigns } from "@/lib/data"
 import { ArrowLeft, CreditCard } from "lucide-react"
 import { useAuth } from "@/hooks/use-auth"
 
-export default function DonatePage({ params }: { params: { id: string } }) {
+export default function DonatePage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params)
   const router = useRouter()
   const { toast } = useToast()
   const { user } = useAuth()
@@ -30,7 +31,7 @@ export default function DonatePage({ params }: { params: { id: string } }) {
   const [paymentMethod, setPaymentMethod] = useState("card")
   const [isLoading, setIsLoading] = useState(false)
 
-  const campaign = allCampaigns.find((c) => c.id === params.id)
+  const campaign = allCampaigns.find((c) => c.id === id)
 
   if (!campaign) {
     return (

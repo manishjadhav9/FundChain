@@ -210,7 +210,7 @@ export async function processDonation({
       body: JSON.stringify({
         amount: amountInPaise,
         currency: 'INR',
-        receipt: `donation_${campaignId}_${Date.now()}`,
+        receipt: `rcpt_${Date.now().toString().slice(-10)}`,
         notes: {
           campaign_id: campaignId,
           campaign_title: campaignTitle,
@@ -223,8 +223,14 @@ export async function processDonation({
     });
     
     if (!orderResponse.ok) {
-      const errorData = await orderResponse.json();
-      throw new Error(errorData.error || 'Failed to create payment order');
+      let errorData;
+      try {
+        errorData = await orderResponse.json();
+      } catch (e) {
+        errorData = { error: 'Failed to parse error response', details: await orderResponse.text() };
+      }
+      console.error('❌ Order creation failed:', errorData);
+      throw new Error(errorData.details || errorData.error || 'Failed to create payment order');
     }
     
     const orderData = await orderResponse.json();
@@ -235,12 +241,12 @@ export async function processDonation({
       console.log(`💰 Payment amount: ₹${amountINR} = ${amountInPaise} paise`);
       
       const options = {
-        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || 'rzp_test_RJuwxk8NAGp7Dc',
+        key: orderData.key || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || 'rzp_test_RUE7U75NdjxIGM',
         amount: orderData.amount, // Amount from server order
         currency: orderData.currency,
         name: 'FundChain',
         description: `Donation for: ${campaignTitle}`,
-        order_id: orderData.order_id, // Order ID from server
+        order_id: orderData.order_id || orderData.orderId, // Order ID from server (support both formats)
         image: '/logo.png',
         handler: async function (response) {
           console.log('💰 Razorpay payment successful:', response);

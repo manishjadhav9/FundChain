@@ -3,8 +3,8 @@ import Razorpay from 'razorpay'
 
 // Initialize Razorpay instance
 const razorpay = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID || 'rzp_test_RJuwxk8NAGp7Dc',
-  key_secret: process.env.RAZORPAY_KEY_SECRET || 'HS05RbxkPCgFoXE10NO27psh',
+  key_id: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || process.env.RAZORPAY_KEY_ID || 'rzp_test_RUE7U75NdjxIGM',
+  key_secret: process.env.RAZORPAY_KEY_SECRET || 'sOheFBXz3PonaJu8T9VHMp4H',
 })
 
 export async function POST(request) {
@@ -30,7 +30,7 @@ export async function POST(request) {
     const options = {
       amount: Math.round(amount * 100), // Convert to paise
       currency,
-      receipt: `receipt_${campaignId}_${Date.now()}`,
+      receipt: `rcpt_${Date.now().toString().slice(-10)}`,
       notes: {
         campaign_id: campaignId,
         campaign_title: campaignTitle || 'FundChain Campaign',
@@ -49,7 +49,7 @@ export async function POST(request) {
       orderId: order.id,
       amount: order.amount,
       currency: order.currency,
-      key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || 'rzp_test_RJuwxk8NAGp7Dc'
+      key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || 'rzp_test_RKfCvQGzGJgS07'
     })
 
   } catch (error) {
