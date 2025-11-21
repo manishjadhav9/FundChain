@@ -13,15 +13,15 @@ import { useAuth } from "@/hooks/use-auth"
 import { allCampaigns } from "@/lib/data"
 import { useToast } from "@/components/ui/use-toast"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { 
-  AlertCircle, 
-  FileText, 
-  Search, 
-  Shield, 
-  Users, 
-  Calendar, 
-  DollarSign, 
-  CheckCircle, 
+import {
+  AlertCircle,
+  FileText,
+  Search,
+  Shield,
+  Users,
+  Calendar,
+  DollarSign,
+  CheckCircle,
   XCircle,
   Eye,
   Alert,
@@ -150,7 +150,7 @@ export default function AdminVerificationsPage() {
   const [orgSearchQuery, setOrgSearchQuery] = useState("")
   const [orgTypeFilter, setOrgTypeFilter] = useState<string>("all")
   const [organizations, setOrganizations] = useState(pendingOrganizations)
-  
+
   const [campSearchQuery, setCampSearchQuery] = useState("")
   const [campTypeFilter, setCampTypeFilter] = useState<string>("all")
   const [campaigns, setCampaigns] = useState(pendingCampaigns)
@@ -250,7 +250,7 @@ export default function AdminVerificationsPage() {
     try {
       const reason = prompt("Please provide a reason for rejection:")
       if (reason === null) return
-      
+
       await rejectCampaign(id, reason)
       // Reload campaigns after rejection
       loadCampaigns()
@@ -463,9 +463,9 @@ export default function AdminVerificationsPage() {
                         </div>
                         <p className="text-muted-foreground">{campaign.description}</p>
                       </div>
-                      
+
                       <div className="flex gap-2">
-                        <Button variant="outline" size="sm" onClick={() => window.open(`/campaigns/preview/${campaign.id}`, '_blank')}>
+                        <Button variant="outline" size="sm" onClick={() => window.open(`/campaigns/${campaign.id}?tab=documents`, '_blank')}>
                           <Eye className="mr-1 h-4 w-4" /> View Full Details
                         </Button>
                         <Button variant="default" size="sm" className="bg-green-600 hover:bg-green-700" onClick={() => handleVerifyCampaign(campaign.id)}>
@@ -476,25 +476,25 @@ export default function AdminVerificationsPage() {
                         </Button>
                       </div>
                     </div>
-                    
+
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
                       <div className="flex items-center gap-2">
                         <Users className="h-4 w-4 text-muted-foreground" />
                         <span className="text-sm">Organizer: {campaign.organizer?.name || "Unknown"}</span>
                       </div>
-                      
+
                       <div className="flex items-center gap-2">
                         <DollarSign className="h-4 w-4 text-muted-foreground" />
                         <span className="text-sm">
                           Target: {formatCurrency(campaign.targetAmountInr)} ({campaign.targetAmount} ETH)
                         </span>
                       </div>
-                      
+
                       <div className="flex items-center gap-2">
                         <Calendar className="h-4 w-4 text-muted-foreground" />
                         <span className="text-sm">Submitted: {formatDate(campaign.submittedAt)}</span>
                       </div>
-                      
+
                       <div className="flex items-center gap-2">
                         <FileText className="h-4 w-4 text-muted-foreground" />
                         <span className="text-sm">
@@ -502,7 +502,7 @@ export default function AdminVerificationsPage() {
                         </span>
                       </div>
                     </div>
-                    
+
                     {campaign.milestones && campaign.milestones.length > 0 && (
                       <div className="mt-4">
                         <h3 className="text-sm font-medium mb-2">Milestones</h3>
@@ -524,10 +524,10 @@ export default function AdminVerificationsPage() {
                       </div>
                     )}
                   </div>
-                  
+
                   {campaign.imageHash && (
                     <div className="border-t flex justify-center p-4 bg-gray-50">
-                      <img 
+                      <img
                         src={`https://ipfs.io/ipfs/${campaign.imageHash}`}
                         alt={campaign.title}
                         className="h-40 object-cover rounded-md"

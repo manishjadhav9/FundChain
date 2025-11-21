@@ -16,14 +16,14 @@ import { createCampaign, verifyCampaign as verifyOnBlockchain, registerCampaignF
 export async function sendCampaignForVerification(campaign) {
   try {
     console.log('Sending campaign for verification:', campaign);
-    
+
     // Extract milestone data
     const milestoneTitles = campaign.milestones.map(m => m.title);
     const milestoneDescriptions = campaign.milestones.map(m => m.description);
     const milestoneAmounts = campaign.milestones.map(m => m.amount);
-    
+
     let contractAddress;
-    
+
     // Try to register the campaign on the blockchain
     try {
       console.log('Attempting to register campaign on blockchain...');
@@ -44,11 +44,11 @@ export async function sendCampaignForVerification(campaign) {
       // Generate a unique mock address for development
       contractAddress = `0x${Date.now().toString(16).padStart(40, '0')}`;
     }
-    
+
     // Get existing pending campaigns
     let pendingCampaigns = [];
     const storedData = localStorage.getItem(PENDING_CAMPAIGNS_KEY);
-    
+
     if (storedData) {
       try {
         pendingCampaigns = JSON.parse(storedData);
@@ -57,7 +57,7 @@ export async function sendCampaignForVerification(campaign) {
         pendingCampaigns = [];
       }
     }
-    
+
     // Add unique ID and status
     const campaignWithMeta = {
       ...campaign,
@@ -70,10 +70,10 @@ export async function sendCampaignForVerification(campaign) {
       percentRaised: 0,
       donorCount: 0
     };
-    
+
     // Add to pending list
     pendingCampaigns.push(campaignWithMeta);
-    
+
     // Save back to localStorage
     try {
       localStorage.setItem(PENDING_CAMPAIGNS_KEY, JSON.stringify(pendingCampaigns));
@@ -81,18 +81,11 @@ export async function sendCampaignForVerification(campaign) {
     } catch (e) {
       console.error('Failed to save to localStorage:', e);
     }
-    
+
     // For development, auto-verify the campaign after a short delay
-    setTimeout(async () => {
-      try {
-        console.log('🔄 Auto-verifying campaign for development...');
-        await verifyCampaign(contractAddress);
-        console.log('✅ Campaign auto-verified successfully');
-      } catch (e) {
-        console.warn('Auto-verification failed:', e.message);
-      }
-    }, 2000);
-    
+    // Auto-verification removed for production flow
+    // Campaigns will remain PENDING until admin manually verifies them
+
     return true;
   } catch (error) {
     console.error('Error sending campaign for verification:', error);
@@ -107,11 +100,11 @@ export async function sendCampaignForVerification(campaign) {
 export async function getPendingCampaigns() {
   try {
     const storedData = localStorage.getItem(PENDING_CAMPAIGNS_KEY);
-    
+
     if (!storedData) {
       return [];
     }
-    
+
     return JSON.parse(storedData).filter(campaign => campaign.status === 'PENDING');
   } catch (error) {
     console.error('Error getting pending campaigns:', error);
@@ -126,7 +119,7 @@ export async function getPendingCampaigns() {
 export async function getApprovedCampaigns() {
   try {
     console.log('📋 Loading approved campaigns...');
-    
+
     // Get campaigns from localStorage first (for development)
     let localCampaigns = [];
     try {
@@ -138,7 +131,7 @@ export async function getApprovedCampaigns() {
     } catch (localError) {
       console.warn('Failed to fetch from localStorage:', localError.message);
     }
-    
+
     // Get campaigns from blockchain (if available)
     let blockchainCampaigns = [];
     try {
@@ -150,10 +143,10 @@ export async function getApprovedCampaigns() {
       console.warn('⚠️ Failed to fetch from blockchain:', blockchainError.message);
       blockchainCampaigns = []; // Ensure it's an array
     }
-    
+
     // Combine campaigns (localStorage takes priority for development)
     const allCampaigns = [...localCampaigns];
-    
+
     // Add blockchain campaigns that aren't already in local data
     blockchainCampaigns.forEach(blockchainCampaign => {
       const exists = allCampaigns.find(lc => lc.id === blockchainCampaign.id);
@@ -161,12 +154,12 @@ export async function getApprovedCampaigns() {
         allCampaigns.push(blockchainCampaign);
       }
     });
-    
+
     // Add some sample campaigns if no campaigns exist (for development)
     if (allCampaigns.length === 0) {
       console.log('📝 No campaigns found, adding sample campaigns for development');
       const sampleCampaigns = createSampleCampaigns();
-      
+
       // Save sample campaigns to localStorage
       try {
         localStorage.setItem(APPROVED_CAMPAIGNS_KEY, JSON.stringify(sampleCampaigns));
@@ -174,13 +167,13 @@ export async function getApprovedCampaigns() {
       } catch (e) {
         console.warn('Failed to save sample campaigns:', e.message);
       }
-      
+
       allCampaigns.push(...sampleCampaigns);
     }
-    
+
     console.log(`📊 Total campaigns to display: ${allCampaigns.length}`);
     return allCampaigns;
-    
+
   } catch (error) {
     console.warn('⚠️ Error getting approved campaigns:', error.message);
     // Return sample campaigns as fallback
@@ -281,35 +274,36 @@ function createSampleCampaigns() {
 export async function verifyCampaign(campaignId) {
   try {
     const storedData = localStorage.getItem(PENDING_CAMPAIGNS_KEY);
-    
+
     if (!storedData) {
       return false;
     }
-    
+
     const campaigns = JSON.parse(storedData);
     let campaignToVerify = campaigns.find(campaign => campaign.id === campaignId);
-    
+
     if (!campaignToVerify) {
       throw new Error('Campaign not found');
     }
-    
+
     console.log('Verifying campaign on blockchain:', campaignId);
-    
+
     // For Ethereum address format IDs (contractAddress)
     if (campaignId.startsWith('0x') && campaignId.length === 42) {
       try {
-        // Call local verification - no MetaMask popup or transaction fees for admin
+        // Call blockchain verification
+        console.log('Initiating blockchain verification transaction...');
         await verifyOnBlockchain(campaignId);
-        console.log('Campaign marked as verified (no network fee required)');
+        console.log('✅ Campaign verified on blockchain');
       } catch (blockchainError) {
-        console.error('Error during verification process:', blockchainError);
-        // Continue with the local verification despite any errors
-        console.warn('Proceeding with local verification');
+        console.error('Error during blockchain verification:', blockchainError);
+        throw new Error(`Blockchain verification failed: ${blockchainError.message}`);
       }
     } else {
-      console.warn('Campaign ID is not a valid contract address, proceeding with local verification only');
+      console.warn('Campaign ID is not a valid contract address, cannot verify on blockchain');
+      throw new Error('Invalid campaign ID for blockchain verification');
     }
-    
+
     // Update status in pending campaigns
     let approvedCampaign = null;
     const updatedCampaigns = campaigns.map(campaign => {
@@ -323,20 +317,20 @@ export async function verifyCampaign(campaignId) {
       }
       return campaign;
     });
-    
+
     // Save updated pending campaigns
     localStorage.setItem(PENDING_CAMPAIGNS_KEY, JSON.stringify(updatedCampaigns));
-    
+
     // If campaign was found and approved, add to approved campaigns list
     if (approvedCampaign) {
       // Get existing approved campaigns
       let approvedCampaigns = [];
       const approvedData = localStorage.getItem(APPROVED_CAMPAIGNS_KEY);
-      
+
       if (approvedData) {
         approvedCampaigns = JSON.parse(approvedData);
       }
-      
+
       // Add approved campaign with display data for the campaigns page
       const approvedCampaignForDisplay = {
         id: approvedCampaign.id,
@@ -346,7 +340,7 @@ export async function verifyCampaign(campaignId) {
         organizer: approvedCampaign.organizer,
         imageHash: approvedCampaign.imageHash,
         targetAmount: approvedCampaign.targetAmount,
-        targetAmountInr: approvedCampaign.targetAmountInr, 
+        targetAmountInr: approvedCampaign.targetAmountInr,
         status: 'VERIFIED',
         amountRaised: approvedCampaign.amountRaised || "0",  // Start with 0 raised
         percentRaised: approvedCampaign.percentRaised || 0, // 0% raised initially
@@ -359,9 +353,9 @@ export async function verifyCampaign(campaignId) {
         contractAddress: approvedCampaign.contractAddress || approvedCampaign.id,
         owner: approvedCampaign.contractAddress || approvedCampaign.id
       };
-      
+
       approvedCampaigns.push(approvedCampaignForDisplay);
-      
+
       // Save updated approved campaigns
       try {
         localStorage.setItem(APPROVED_CAMPAIGNS_KEY, JSON.stringify(approvedCampaigns));
@@ -370,7 +364,7 @@ export async function verifyCampaign(campaignId) {
         console.error('Failed to save approved campaigns to localStorage:', e);
       }
     }
-    
+
     return true;
   } catch (error) {
     console.error('Error verifying campaign:', error);
@@ -387,11 +381,11 @@ export async function verifyCampaign(campaignId) {
 export async function rejectCampaign(campaignId, reason = '') {
   try {
     const storedData = localStorage.getItem(PENDING_CAMPAIGNS_KEY);
-    
+
     if (!storedData) {
       return false;
     }
-    
+
     const campaigns = JSON.parse(storedData);
     const updatedCampaigns = campaigns.map(campaign => {
       if (campaign.id === campaignId) {
@@ -404,7 +398,7 @@ export async function rejectCampaign(campaignId, reason = '') {
       }
       return campaign;
     });
-    
+
     localStorage.setItem(PENDING_CAMPAIGNS_KEY, JSON.stringify(updatedCampaigns));
     return true;
   } catch (error) {

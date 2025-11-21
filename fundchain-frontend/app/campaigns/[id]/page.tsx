@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState, useEffect, use } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { getCampaign, donateToCampaign } from "@/lib/contracts"
 import { processDonation, loadRazorpaySDK, convertINRToETH } from "@/lib/razorpay"
 import { processDonationFallback } from "@/lib/razorpay-fallback"
@@ -31,40 +31,43 @@ function CampaignDetailsPageContent({ params }: { params: any }) {
   // Use chunk error handler
   useChunkErrorHandler()
 
+  const searchParams = useSearchParams()
+  const defaultTab = searchParams.get("tab") || "overview"
+
   useEffect(() => {
     const fetchCampaign = async () => {
       try {
         setLoading(true)
         console.log('🔍 Fetching campaign with ID:', campaignId)
-        
+
         // Check localStorage for campaigns
         const approvedCampaigns = localStorage.getItem('fundchain-approved-campaigns');
         const pendingCampaigns = localStorage.getItem('fundchain-pending-campaigns');
         let allCampaigns: any[] = [];
-        
+
         if (approvedCampaigns) {
           allCampaigns.push(...JSON.parse(approvedCampaigns));
         }
         if (pendingCampaigns) {
           allCampaigns.push(...JSON.parse(pendingCampaigns));
         }
-        
-        let foundCampaign = allCampaigns.find(c => 
+
+        let foundCampaign = allCampaigns.find(c =>
           c.id === campaignId || c.contractAddress === campaignId
         );
-        
+
         if (!foundCampaign) {
           // Try sample campaigns
           const { getApprovedCampaigns } = await import('@/lib/admin-service');
           const sampleCampaigns = await getApprovedCampaigns();
           foundCampaign = sampleCampaigns.find(c => c.id === campaignId);
         }
-        
+
         if (!foundCampaign) {
           setError(`Campaign "${campaignId}" not found.`);
           return;
         }
-        
+
         // Enrich campaign data
         const enrichedCampaign = {
           ...foundCampaign,
@@ -76,9 +79,9 @@ function CampaignDetailsPageContent({ params }: { params: any }) {
           documentHashes: foundCampaign.documentHashes || foundCampaign.documentCids || [],
           imageHash: foundCampaign.imageHash || foundCampaign.imageCid || 'QmX2DiQ53iJAgWDXRCDyibXtnxpyRDdV1EbogtPAH88Hnk'
         };
-        
+
         setCampaign(enrichedCampaign);
-        
+
       } catch (error) {
         console.error('Error fetching campaign:', error);
         setError('Failed to load campaign details.');
@@ -86,7 +89,7 @@ function CampaignDetailsPageContent({ params }: { params: any }) {
         setLoading(false);
       }
     };
-    
+
     if (campaignId) {
       fetchCampaign();
     }
@@ -98,7 +101,7 @@ function CampaignDetailsPageContent({ params }: { params: any }) {
     setRazorpayError(null);
     console.log('✅ Razorpay loaded via Script component');
   };
-  
+
   const handleRazorpayError = (error: Error) => {
     setRazorpayLoaded(false);
     setRazorpayError(error.message);
@@ -112,44 +115,44 @@ function CampaignDetailsPageContent({ params }: { params: any }) {
     }
 
     const amountINR = parseFloat(donationAmount);
-    
+
     // Validate minimum amount (₹1)
     if (amountINR < 1) {
       alert('Minimum donation amount is ₹1');
       return;
     }
-    
+
     // Validate maximum amount (reasonable limit)
     if (amountINR > 1000000) {
       alert('Maximum donation amount is ₹10,00,000');
       return;
     }
-    
+
     const ethAmount = convertINRToETH(amountINR);
 
     try {
       setIsDonating(true);
-      
+
       console.log(`💰 Starting donation process for ₹${amountINR} (${ethAmount} ETH)`);
       console.log('Campaign details:', { id: campaign.id, title: campaign.title });
-      
+
       // Check if we're in browser environment
       if (typeof window === 'undefined') {
         throw new Error('Donation can only be processed in browser environment');
       }
-      
+
       // Check if Razorpay is loaded
       if (!razorpayLoaded) {
         throw new Error(
-          razorpayError || 
+          razorpayError ||
           'Payment gateway is not ready. Please wait for it to load or disable your ad blocker.'
         );
       }
-      
+
       console.log('🚀 Processing donation...');
-      
+
       let result;
-      
+
       // Use direct payment method as primary (bypasses server-side issues)
       try {
         console.log('💳 Using direct payment method (recommended)...');
@@ -162,7 +165,7 @@ function CampaignDetailsPageContent({ params }: { params: any }) {
         });
       } catch (directError: any) {
         console.warn('⚠️ Direct payment failed, trying server-side method:', directError.message);
-        
+
         try {
           // Fallback to server-side order creation
           result = await processDonation({
@@ -174,7 +177,7 @@ function CampaignDetailsPageContent({ params }: { params: any }) {
           });
         } catch (serverError: any) {
           console.warn('⚠️ Server-side payment also failed, trying final fallback:', serverError.message);
-          
+
           // Final fallback method
           result = await processDonationFallback({
             campaignId: campaign.id,
@@ -185,9 +188,9 @@ function CampaignDetailsPageContent({ params }: { params: any }) {
           });
         }
       }
-      
+
       console.log('✅ Donation successful:', result);
-      
+
       // Update campaign data locally
       setCampaign((prev: any) => ({
         ...prev,
@@ -199,22 +202,22 @@ function CampaignDetailsPageContent({ params }: { params: any }) {
         ),
         donorCount: (prev.donorCount || 0) + 1
       }));
-      
+
       // Show success message
       alert(`🎉 Thank you for your donation of ₹${amountINR}!\n\nTransaction Hash: ${result.transactionHash}\n\nYour contribution will help make a difference.`);
-      
+
       // Reset form
       setDonationAmount('');
       setShowDonationForm(false);
-      
+
     } catch (error: any) {
       console.error('❌ Donation failed:', error);
-      
+
       let errorMessage = 'An unexpected error occurred';
       if (error.message) {
         errorMessage = error.message;
       }
-      
+
       // Show user-friendly error message
       if (errorMessage.includes('cancelled')) {
         alert('Payment was cancelled. You can try again anytime.');
@@ -293,7 +296,7 @@ function CampaignDetailsPageContent({ params }: { params: any }) {
                   }}
                 />
               </div>
-              
+
               {/* Progress */}
               <div className="space-y-2 mb-4">
                 <div className="flex justify-between text-sm">
@@ -310,19 +313,19 @@ function CampaignDetailsPageContent({ params }: { params: any }) {
                   <span>{campaign.percentRaised || 0}% funded</span>
                 </div>
               </div>
-              
+
               <p className="text-muted-foreground">{campaign.description}</p>
             </CardContent>
           </Card>
 
           {/* Tabs */}
-          <Tabs defaultValue="overview" className="w-full">
+          <Tabs defaultValue={defaultTab} className="w-full">
             <TabsList>
               <TabsTrigger value="overview">Overview</TabsTrigger>
               <TabsTrigger value="documents">Documents</TabsTrigger>
               <TabsTrigger value="organizer">Organizer</TabsTrigger>
             </TabsList>
-            
+
             <TabsContent value="overview" className="space-y-4">
               <Card>
                 <CardHeader>
@@ -333,7 +336,7 @@ function CampaignDetailsPageContent({ params }: { params: any }) {
                 </CardContent>
               </Card>
             </TabsContent>
-            
+
             <TabsContent value="documents" className="space-y-4">
               <Card>
                 <CardHeader>
@@ -368,7 +371,7 @@ function CampaignDetailsPageContent({ params }: { params: any }) {
                 </CardContent>
               </Card>
             </TabsContent>
-            
+
             <TabsContent value="organizer" className="space-y-4">
               <Card>
                 <CardHeader>
@@ -390,7 +393,7 @@ function CampaignDetailsPageContent({ params }: { params: any }) {
             </TabsContent>
           </Tabs>
         </div>
-        
+
         {/* Sidebar */}
         <div className="space-y-6">
           {/* Donation Card */}
@@ -408,7 +411,7 @@ function CampaignDetailsPageContent({ params }: { params: any }) {
                     <p className="text-sm text-muted-foreground mb-4">
                       Help make a difference with your contribution
                     </p>
-                    <Button 
+                    <Button
                       onClick={() => setShowDonationForm(true)}
                       className="w-full bg-orange-500 hover:bg-orange-600"
                       size="lg"
@@ -445,7 +448,7 @@ function CampaignDetailsPageContent({ params }: { params: any }) {
                       </p>
                     )}
                   </div>
-                  
+
                   <div className="flex gap-2">
                     <Button
                       onClick={handleDonation}
@@ -475,7 +478,7 @@ function CampaignDetailsPageContent({ params }: { params: any }) {
                       Cancel
                     </Button>
                   </div>
-                  
+
                   <div className="text-xs text-muted-foreground space-y-1">
                     <p>🔒 Your payment is secure and encrypted</p>
                     <p>📧 You'll receive a confirmation email</p>
@@ -528,9 +531,9 @@ function CampaignDetailsPageContent({ params }: { params: any }) {
           </Card>
         </div>
       </div>
-      
+
       {/* Razorpay Script Component */}
-      <RazorpayScript 
+      <RazorpayScript
         onLoad={handleRazorpayLoad}
         onError={handleRazorpayError}
       />
