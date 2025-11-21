@@ -28,12 +28,12 @@ export default function CreateCampaignPage() {
     documentCids: [] as string[],
     milestones: [] as { title: string; description: string; amount: string }[]
   })
-  
+
   // Add state for milestones
   const [milestones, setMilestones] = useState([
     { title: "Initial Funding", description: "First milestone for campaign setup", amount: "0.5" }
   ]);
-  
+
   const [error, setError] = useState<string>("")
   const [submitting, setSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
@@ -56,69 +56,69 @@ export default function CreateCampaignPage() {
     const { name, value } = e.target
     setFormData(prev => ({ ...prev, [name]: value }))
   }
-  
+
   const handleSelectChange = (value: string) => {
     setFormData(prev => ({ ...prev, campaignType: value }))
   }
-  
+
   const handleImageUpload = (cid: string) => {
     setFormData(prev => ({ ...prev, imageCid: cid }))
   }
-  
+
   const handleDocumentUpload = (cid: string) => {
     if (!cid) return
-    setFormData(prev => ({ 
-      ...prev, 
-      documentCids: [...prev.documentCids, cid] 
+    setFormData(prev => ({
+      ...prev,
+      documentCids: [...prev.documentCids, cid]
     }))
   }
-  
+
   const removeDocument = (index: number) => {
     setFormData(prev => ({
       ...prev,
       documentCids: prev.documentCids.filter((_, i) => i !== index)
     }))
   }
-  
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (submitting) return;
-    
+
     try {
       setSubmitting(true);
       setError("");
-      
+
       // Basic validation
       if (!formData.title || !formData.description || !formData.targetAmount || !formData.campaignType) {
         setError("Please fill in all required fields");
         return;
       }
-      
+
       if (!formData.imageCid) {
         setError("Please upload a campaign image");
         return;
       }
-      
+
       if (formData.documentCids.length === 0) {
         setError("Please upload at least one supporting document");
         return;
       }
-      
+
       if (formData.milestones.length === 0) {
         setError("Please add at least one milestone");
         return;
       }
-      
+
       // Check total milestone amount equals target amount
       const totalMilestoneAmount = formData.milestones.reduce((sum, m) => sum + parseFloat(m.amount), 0);
       const targetAmountFloat = parseFloat(formData.targetAmount);
-      
+
       if (Math.abs(totalMilestoneAmount - targetAmountFloat) > 0.001) {
         setError(`Total milestone amount (${totalMilestoneAmount} ETH) must equal target amount (${targetAmountFloat} ETH)`);
         return;
       }
-      
+
       // Create metadata for IPFS
       const metadata = {
         title: formData.title,
@@ -130,16 +130,16 @@ export default function CreateCampaignPage() {
         milestones: formData.milestones,
         createdAt: new Date().toISOString()
       };
-      
+
       // Upload metadata to IPFS with pinning
       console.log("📤 Uploading and pinning metadata to IPFS...");
-      
+
       let metadataCid;
       try {
         // Create a blob from the metadata JSON
         const metadataBlob = new Blob([JSON.stringify(metadata, null, 2)], { type: 'application/json' });
         const metadataFile = new File([metadataBlob], 'campaign-metadata.json', { type: 'application/json' });
-        
+
         // Upload with pinning
         metadataCid = await uploadAndPinFile(metadataFile, {
           pinningService: 'LOCAL',
@@ -149,7 +149,7 @@ export default function CreateCampaignPage() {
             createdAt: new Date().toISOString()
           }
         });
-        
+
         console.log("✅ Metadata uploaded and pinned with CID:", metadataCid);
       } catch (pinningError) {
         console.warn('⚠️ Enhanced metadata upload failed, trying fallback:', pinningError.message);
@@ -157,13 +157,13 @@ export default function CreateCampaignPage() {
         metadataCid = await uploadJSONToIPFS(metadata);
         console.log("✅ Metadata uploaded (fallback) with CID:", metadataCid);
       }
-      
+
       // Show metamask network fee warning
       if (!confirm("You will need to pay a small network fee using MetaMask to register your campaign on the blockchain. Continue?")) {
         setError("Campaign submission cancelled");
         return;
       }
-      
+
       // Create campaign verification request data
       const campaignData = {
         title: formData.title,
@@ -177,17 +177,17 @@ export default function CreateCampaignPage() {
         metadataCid: metadataCid,
         // Add organizer info - in a real app, this would come from auth context
         organizer: {
-          name: "John Doe", 
+          name: "John Doe",
           email: "john@example.com",
           address: "0x1234567890123456789012345678901234567890"
         }
       };
-      
+
       // Send campaign for admin verification - this will trigger MetaMask
       await sendCampaignForVerification(campaignData);
-      
+
       setSubmitted(true);
-      
+
     } catch (err: any) {
       setError(`Failed to create campaign: ${err.message}`)
       console.error("Campaign creation error:", err)
@@ -195,7 +195,7 @@ export default function CreateCampaignPage() {
       setSubmitting(false)
     }
   }
-  
+
   if (submitted) {
     return (
       <div className="container py-10">
@@ -208,14 +208,14 @@ export default function CreateCampaignPage() {
             <p className="mt-2 font-medium">Note: You've already paid the network fee to register the campaign. No additional fee is required.</p>
           </AlertDescription>
         </Alert>
-        
+
         <div className="flex justify-between">
           <Link href="/campaigns">
             <Button variant="outline">
               <ArrowLeft className="mr-2 h-4 w-4" /> Back to Campaigns
             </Button>
           </Link>
-          
+
           <Link href="/my-campaigns">
             <Button>
               View My Campaigns
@@ -236,7 +236,7 @@ export default function CreateCampaignPage() {
           </Button>
         </Link>
       </div>
-      
+
       <form onSubmit={handleSubmit}>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-6">
@@ -250,7 +250,7 @@ export default function CreateCampaignPage() {
               <CardContent className="space-y-4">
                 <div>
                   <Label htmlFor="title">Campaign Title <span className="text-red-500">*</span></Label>
-                  <Input 
+                  <Input
                     id="title"
                     name="title"
                     placeholder="Enter a compelling title"
@@ -259,10 +259,10 @@ export default function CreateCampaignPage() {
                     required
                   />
                 </div>
-                
+
                 <div>
                   <Label htmlFor="description">Description <span className="text-red-500">*</span></Label>
-                  <Textarea 
+                  <Textarea
                     id="description"
                     name="description"
                     placeholder="Describe your campaign and why people should support it"
@@ -272,11 +272,11 @@ export default function CreateCampaignPage() {
                     required
                   />
                 </div>
-                
+
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="targetAmount">Target Amount (in ETH) <span className="text-red-500">*</span></Label>
-                    <Input 
+                    <Input
                       id="targetAmount"
                       name="targetAmount"
                       type="number"
@@ -293,10 +293,10 @@ export default function CreateCampaignPage() {
                       </p>
                     )}
                   </div>
-                  
+
                   <div>
                     <Label htmlFor="campaignType">Campaign Type <span className="text-red-500">*</span></Label>
-                    <Select 
+                    <Select
                       value={formData.campaignType}
                       onValueChange={handleSelectChange}
                     >
@@ -315,7 +315,7 @@ export default function CreateCampaignPage() {
                 </div>
               </CardContent>
             </Card>
-            
+
             <Card>
               <CardHeader>
                 <CardTitle>Campaign Media</CardTitle>
@@ -333,7 +333,7 @@ export default function CreateCampaignPage() {
                       <FileText className="mr-2 h-4 w-4" /> Supporting Documents
                     </TabsTrigger>
                   </TabsList>
-                  
+
                   <TabsContent value="image">
                     <IpfsUpload
                       label="Campaign Image"
@@ -344,7 +344,7 @@ export default function CreateCampaignPage() {
                       required
                     />
                   </TabsContent>
-                  
+
                   <TabsContent value="documents">
                     <div className="space-y-6">
                       <IpfsUpload
@@ -354,7 +354,7 @@ export default function CreateCampaignPage() {
                         acceptedFileTypes=".pdf,.doc,.docx,.jpg,.jpeg,.png"
                         maxSizeMB={20}
                       />
-                      
+
                       {formData.documentCids.length > 0 && (
                         <div className="mt-4">
                           <h3 className="text-sm font-medium mb-2">Uploaded Documents</h3>
@@ -393,8 +393,8 @@ export default function CreateCampaignPage() {
                     <div className="flex justify-between items-center">
                       <h3 className="font-medium">Milestone {index + 1}</h3>
                       {index > 0 && (
-                        <Button 
-                          variant="ghost" 
+                        <Button
+                          variant="ghost"
                           size="sm"
                           onClick={() => {
                             setMilestones(prev => prev.filter((_, i) => i !== index));
@@ -404,10 +404,10 @@ export default function CreateCampaignPage() {
                         </Button>
                       )}
                     </div>
-                    
+
                     <div>
                       <Label htmlFor={`milestone-title-${index}`}>Title</Label>
-                      <Input 
+                      <Input
                         id={`milestone-title-${index}`}
                         value={milestone.title}
                         onChange={(e) => {
@@ -419,10 +419,10 @@ export default function CreateCampaignPage() {
                         className="mt-1"
                       />
                     </div>
-                    
+
                     <div>
                       <Label htmlFor={`milestone-desc-${index}`}>Description</Label>
-                      <Textarea 
+                      <Textarea
                         id={`milestone-desc-${index}`}
                         value={milestone.description}
                         onChange={(e) => {
@@ -435,10 +435,10 @@ export default function CreateCampaignPage() {
                         rows={2}
                       />
                     </div>
-                    
+
                     <div>
                       <Label htmlFor={`milestone-amount-${index}`}>Amount (ETH)</Label>
-                      <Input 
+                      <Input
                         id={`milestone-amount-${index}`}
                         value={milestone.amount}
                         onChange={(e) => {
@@ -455,14 +455,14 @@ export default function CreateCampaignPage() {
                     </div>
                   </div>
                 ))}
-                
+
                 <Button
                   type="button"
                   variant="outline"
                   className="w-full"
                   onClick={() => {
                     setMilestones(prev => [
-                      ...prev, 
+                      ...prev,
                       {
                         title: `Milestone ${prev.length + 1}`,
                         description: "",
@@ -473,14 +473,14 @@ export default function CreateCampaignPage() {
                 >
                   Add Milestone
                 </Button>
-                
+
                 <div className="text-sm text-muted-foreground">
                   Note: Total milestone amounts should equal your campaign target amount of {formData.targetAmount || "0"} ETH.
                 </div>
               </CardContent>
             </Card>
           </div>
-          
+
           <div className="space-y-6">
             <Card>
               <CardHeader>
@@ -494,21 +494,21 @@ export default function CreateCampaignPage() {
                       {formData.title || "Not provided"}
                     </p>
                   </div>
-                  
+
                   <div>
                     <h3 className="text-sm font-medium">Type</h3>
                     <p className="text-sm text-muted-foreground">
                       {formData.campaignType || "Not selected"}
                     </p>
                   </div>
-                  
+
                   <div>
                     <h3 className="text-sm font-medium">Target Amount</h3>
                     <p className="text-sm text-muted-foreground">
                       {formData.targetAmount ? `${formData.targetAmount} ETH` : "Not provided"}
                     </p>
                   </div>
-                  
+
                   <div>
                     <h3 className="text-sm font-medium">Media</h3>
                     <p className="text-sm text-muted-foreground">
@@ -517,22 +517,22 @@ export default function CreateCampaignPage() {
                     </p>
                   </div>
                 </div>
-                
+
                 {error && (
                   <Alert variant="destructive" className="mt-4">
                     <AlertCircle className="h-4 w-4" />
                     <AlertDescription>{error}</AlertDescription>
                   </Alert>
                 )}
-                
-                <Button 
-                  className="w-full mt-6" 
+
+                <Button
+                  className="w-full mt-6"
                   type="submit"
                   disabled={submitting}
                 >
                   {submitting ? "Creating Campaign..." : "Create Campaign"}
                 </Button>
-                
+
                 <p className="text-xs text-muted-foreground mt-4 text-center">
                   By creating a campaign, you agree to our terms and conditions.
                 </p>

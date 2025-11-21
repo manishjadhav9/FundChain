@@ -360,8 +360,44 @@ export async function verifyCampaign(campaignId) {
       try {
         localStorage.setItem(APPROVED_CAMPAIGNS_KEY, JSON.stringify(approvedCampaigns));
         console.log('💾 Campaign added to approved list and saved to localStorage');
+
+        // Create a community post for the verified campaign
+        const COMMUNITY_POSTS_KEY = 'fundchain-community-posts';
+        let communityPosts = [];
+        try {
+          const storedPosts = localStorage.getItem(COMMUNITY_POSTS_KEY);
+          if (storedPosts) {
+            communityPosts = JSON.parse(storedPosts);
+          }
+        } catch (e) {
+          console.warn('Failed to parse community posts:', e);
+        }
+
+        const newPost = {
+          id: `post-${Date.now()}`,
+          author: {
+            name: approvedCampaign.organizer?.name || 'Campaign Organizer',
+            image: `https://api.dicebear.com/7.x/avataaars/svg?seed=${approvedCampaign.organizer?.name || 'Organizer'}`,
+            role: 'Campaign Creator'
+          },
+          content: `We are excited to launch our new campaign: ${approvedCampaign.title}. ${approvedCampaign.description.substring(0, 150)}... Please support us!`,
+          image: approvedCampaign.imageHash ? `http://127.0.0.1:8080/ipfs/${approvedCampaign.imageHash}` : undefined,
+          campaign: {
+            title: approvedCampaign.title,
+            link: `/campaigns/${approvedCampaign.id}`
+          },
+          likes: 0,
+          isLiked: false,
+          comments: [],
+          timestamp: 'Just now'
+        };
+
+        communityPosts.unshift(newPost);
+        localStorage.setItem(COMMUNITY_POSTS_KEY, JSON.stringify(communityPosts));
+        console.log('✅ Created community post for verified campaign');
+
       } catch (e) {
-        console.error('Failed to save approved campaigns to localStorage:', e);
+        console.error('Failed to save approved campaigns or create post:', e);
       }
     }
 
